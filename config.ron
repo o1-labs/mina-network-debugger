@@ -1,6 +1,0 @@
-(
-    debuggers: [
-        "http://develop.dev.openmina.com:80",
-        "https://debug.dev.openmina.com:443",
-    ],
-)

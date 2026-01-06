@@ -1,0 +1,15 @@
+[package]
+name = "ebpf-user-macros"
+version = "0.2.0"
+authors = ["Vladislav Melnik <vladislav.melnik@protonmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "User space macros for libbpf"
+repository = "https://github.com/vlad9486/ebpf-tools"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "1.0", features = ["derive", "parsing"] }
+quote = "1.0"

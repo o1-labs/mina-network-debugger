@@ -2,26 +2,43 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Reference
+
+Run `make help` to see all available commands.
+
 ## Build Commands
 
 ```bash
-# Build the main bpf-recorder binary (requires Linux with eBPF support)
-cargo build --bin bpf-recorder --release
+# Setup development environment
+make setup              # Install all dependencies (Rust, bpf-linker, capnproto)
+make setup-deps         # Install system dependencies (Ubuntu/Debian)
 
-# Build with BPF kernel module (uses nightly from rust-toolchain.toml)
-CARGO_TARGET_DIR=target/bpf cargo rustc --package=bpf-recorder --bin=bpf-recorder-kern --features=kern --no-default-features --target=bpfel-unknown-none -Z build-std=core --release -- -Cdebuginfo=2 -Clink-arg=--disable-memory-builtins -Clink-arg=--btf
+# Build
+make build              # Debug build
+make build-release      # Release build
+make build-kern         # Build BPF kernel module (requires nightly)
+make build-all          # Build both kernel module and userspace
 
-# Build the integration test binary
-cargo build --bin coda-libp2p_helper-test
+# Test
+make test               # Run unit tests
+make test-release       # Run tests in release mode
 
-# Run unit tests
-cargo test
+# Run
+make run                # Build and run debugger (requires sudo)
+make run-test           # Run integration test
 
-# Run the debugger (requires sudo on Linux)
-sudo -E RUST_LOG=info ./target/release/bpf-recorder
+# Code quality
+make format             # Format code with rustfmt
+make check-format       # Check formatting
+make lint               # Run clippy linter
 
-# Run in test mode
-sudo -E RUST_LOG=info TEST=1 TERMINATE=1 ./target/release/bpf-recorder
+# Docker
+make docker-build       # Build Docker image
+make docker-run         # Run in Docker container
+
+# Clean
+make clean              # Clean build artifacts
+make clean-db           # Clean database directory
 ```
 
 ## Architecture
@@ -74,3 +91,5 @@ Requires Linux with:
 - Rust nightly (version specified in rust-toolchain.toml)
 - bpf-linker (from https://github.com/aya-rs/bpf-linker)
 - capnproto, libelf-dev, libbpf-dev, protobuf-compiler
+
+Run `make setup` to install all prerequisites.

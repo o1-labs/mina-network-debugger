@@ -8,4 +8,4 @@ name = "coda-libp2p_helper-test"
 path = "src/main.rs"
 
 [dependencies]
-rand = { version = "0.8.5" }
+rand = { workspace = true }

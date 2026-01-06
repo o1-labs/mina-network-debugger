@@ -5,28 +5,28 @@ edition = "2021"
 
 [dependencies]
 # system
-structopt = { version = "0.3.26" }
-env_logger = { version = "0.11.3", default-features = false }
-anyhow = { version = "1.0" }
-signal-hook = { version = "0.3.17" }
-nix = { version = "0.28.0" }
+structopt = { workspace = true }
+env_logger = { workspace = true }
+anyhow = { workspace = true }
+signal-hook = { workspace = true }
+nix = { workspace = true }
 
 # utils
-log = { version = "0.4.22" }
-hex = { version = "0.4.3" }
-roxmltree = { version = "0.20.0" }
-time = { version = "0.3.36", features = ["parsing", "formatting"] }
-rand = { version = "0.8.5" }
+log = { workspace = true }
+hex = { workspace = true }
+roxmltree = { workspace = true }
+time = { workspace = true }
+rand = { workspace = true }
 
 # graph
-petgraph = { version = "0.6.5" }
+petgraph = { workspace = true }
 
 # http
-serde = { version = "1.0" }
-serde_json = { version = "1.0", features = ["preserve_order"] }
-tokio = { version = "1.38.0", features = ["rt-multi-thread"] }
-warp = { version = "0.3.7" }
-reqwest = { version = "0.12.5", features = ["blocking"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+warp = { workspace = true }
+reqwest = { workspace = true }
 
 # mina
-mina-ipc = { path = "../mina-ipc" }
+mina-ipc = { workspace = true }

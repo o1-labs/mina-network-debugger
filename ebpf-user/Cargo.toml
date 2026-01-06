@@ -8,10 +8,10 @@ description = "User space wrapper for libbpf"
 repository = "https://github.com/vlad9486/ebpf-tools"
 
 [dependencies]
-libbpf-sys = "1.1.1+v1.1.0"
-cty = "0.2.2"
-errno = { version = "0.3.1" }
-ebpf-user-macros = { version = "0.2.0", path = "macros", optional = true }
+libbpf-sys = { workspace = true }
+cty = { workspace = true }
+errno = { workspace = true }
+ebpf-user-macros = { workspace = true, optional = true }
 
 [features]
 macros = ["ebpf-user-macros"]

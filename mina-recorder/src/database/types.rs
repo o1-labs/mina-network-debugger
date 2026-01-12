@@ -12,9 +12,12 @@ use radiation::{Absorb, Emit};
 use serde::{Serialize, Deserialize};
 
 use crate::{
-    event::ConnectionInfo, custom_coding, strace::StraceLine, libp2p_helper::CapnpEvent,
+    event::ConnectionInfo, custom_coding, libp2p_helper::CapnpEvent,
     meshsub_stats::Hash,
 };
+
+#[cfg(target_arch = "x86_64")]
+use crate::strace::StraceLine;
 
 #[derive(
     Clone, Copy, Debug, Absorb, Emit, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord,
@@ -315,6 +318,7 @@ impl Timestamp for FullMessage {
     }
 }
 
+#[cfg(target_arch = "x86_64")]
 impl Timestamp for StraceLine {
     fn timestamp(&self) -> Duration {
         self.start

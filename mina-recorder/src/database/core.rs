@@ -34,10 +34,12 @@ use crate::{
         DecodeError, MessageType,
         meshsub_stats::{self, BlockStat, TxStat, Hash},
     },
-    strace::StraceLine,
     meshsub::{SnarkByHash, Event, SnarkWithHash},
     ChunkHeader,
 };
+
+#[cfg(target_arch = "x86_64")]
+use crate::strace::StraceLine;
 
 #[derive(Debug, Error)]
 pub enum DbError {
@@ -886,6 +888,7 @@ impl DbCore {
         Ok(hex::encode(&buf))
     }
 
+    #[cfg(target_arch = "x86_64")]
     pub fn fetch_strace(
         &self,
         id: u64,

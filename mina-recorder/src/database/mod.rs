@@ -5,7 +5,10 @@ pub use self::types::{
 };
 
 mod rocksdb;
-pub use self::rocksdb::{DbFacade, DbGroup, DbStream, DbStrace};
+pub use self::rocksdb::{DbFacade, DbGroup, DbStream};
+
+#[cfg(target_arch = "x86_64")]
+pub use self::rocksdb::DbStrace;
 
 mod params;
 pub use self::params::Params;

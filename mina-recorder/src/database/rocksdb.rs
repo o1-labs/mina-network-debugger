@@ -21,9 +21,11 @@ use crate::{
         MessageType,
         meshsub_stats::{BlockStat, TxStat},
     },
-    strace::StraceLine,
     meshsub_stats::Event,
 };
+
+#[cfg(target_arch = "x86_64")]
+use crate::strace::StraceLine;
 
 use super::{
     core::{DbCore, DbError},
@@ -70,6 +72,7 @@ impl DbFacade {
         self.inner.put_stats_tx(height, value.chain(vec![]))
     }
 
+    #[cfg(target_arch = "x86_64")]
     pub fn strace(&self) -> Result<DbStrace, DbError> {
         Ok(DbStrace {
             strace_cnt: AtomicU64::new(self.inner.total::<{ DbCore::STRACE_CNT }>()?),
@@ -124,11 +127,13 @@ impl DbFacade {
     }
 }
 
+#[cfg(target_arch = "x86_64")]
 pub struct DbStrace {
     strace_cnt: AtomicU64,
     inner: DbCore,
 }
 
+#[cfg(target_arch = "x86_64")]
 impl DbStrace {
     pub fn add_strace_line(&self, line: StraceLine) -> Result<(), DbError> {
         let id = self.strace_cnt.fetch_add(1, SeqCst);

@@ -63,12 +63,11 @@ curl https://sh.rustup.rs -sSf | sh -s -- -y
 source ~/.cargo/env
 ```
 
-Rust `nightly-2022-10-10` and bpf linker.
+Rust nightly and bpf linker. The project includes a `rust-toolchain.toml` that will automatically select the correct nightly version.
 
 ```
-rustup update nightly-2022-10-10
-rustup component add rust-src --toolchain nightly-2022-10-10-x86_64-unknown-linux-gnu
-cargo install bpf-linker --git https://github.com/vlad9486/bpf-linker --branch keep-btf
+rustup component add rust-src
+cargo install bpf-linker --git https://github.com/aya-rs/bpf-linker
 ```
 
 And finally, capnproto.

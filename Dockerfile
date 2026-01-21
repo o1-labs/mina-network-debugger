@@ -3,8 +3,7 @@
 
 FROM ubuntu:20.04 as builder
 
-ARG linker_src="https://github.com/vlad9486/bpf-linker"
-ARG linker_branch="keep-btf"
+ARG linker_src="https://github.com/aya-rs/bpf-linker"
 
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -23,16 +22,15 @@ RUN curl -sSL https://capnproto.org/capnproto-c++-0.10.2.tar.gz | tar -zxf - \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
-RUN rustup update nightly-2022-10-10 && rustup update nightly-2022-12-10 && rustup default stable
+RUN rustup update nightly-2026-01-20 && rustup default nightly-2026-01-20
 
-RUN rustup component add rust-src \
-        --toolchain nightly-2022-10-10-x86_64-unknown-linux-gnu
+RUN rustup component add rust-src
 
-RUN cargo +nightly-2022-12-10 install bpf-linker --git ${linker_src} --branch ${linker_branch}
+RUN cargo install bpf-linker --git ${linker_src}
 
 # RUN cargo install --git https://github.com/openmina/mina-network-debugger bpf-recorder --bin bpf-recorder
 COPY . .
-RUN CARGO_TARGET_DIR=target/bpf cargo +nightly-2022-10-10 rustc --package=bpf-recorder --bin=bpf-recorder-kern --features=kern --no-default-features --target=bpfel-unknown-none -Z build-std=core --release -- -Cdebuginfo=2 -Clink-arg=--disable-memory-builtins -Clink-arg=--keep-btf
+RUN CARGO_TARGET_DIR=target/bpf cargo rustc --package=bpf-recorder --bin=bpf-recorder-kern --features=kern --no-default-features --target=bpfel-unknown-none -Z build-std=core --release -- -Cdebuginfo=2 -Clink-arg=--disable-memory-builtins -Clink-arg=--btf
 RUN cargo install --path bpf-recorder bpf-recorder
 RUN cargo install --path mina-aggregator mina-aggregator
 RUN cargo install --path topology-tool topology-tool

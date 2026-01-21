@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Build the main bpf-recorder binary (requires Linux with eBPF support)
 cargo build --bin bpf-recorder --release
 
-# Build with BPF kernel module (requires nightly-2022-10-10 toolchain)
-cargo build --bin bpf-recorder-kern --release --features kern
+# Build with BPF kernel module (uses nightly from rust-toolchain.toml)
+CARGO_TARGET_DIR=target/bpf cargo rustc --package=bpf-recorder --bin=bpf-recorder-kern --features=kern --no-default-features --target=bpfel-unknown-none -Z build-std=core --release -- -Cdebuginfo=2 -Clink-arg=--disable-memory-builtins -Clink-arg=--btf
 
 # Build the integration test binary
 cargo build --bin coda-libp2p_helper-test
@@ -71,6 +71,6 @@ Each layer implements the `HandleData` trait with `on_data()` method to process 
 ## Build Prerequisites
 
 Requires Linux with:
-- Rust nightly-2022-10-10 (for BPF kernel module)
-- bpf-linker (from https://github.com/vlad9486/bpf-linker)
+- Rust nightly (version specified in rust-toolchain.toml)
+- bpf-linker (from https://github.com/aya-rs/bpf-linker)
 - capnproto, libelf-dev, libbpf-dev, protobuf-compiler

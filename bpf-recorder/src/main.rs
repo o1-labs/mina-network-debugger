@@ -506,7 +506,7 @@ impl App {
         }
     }
 
-    #[inline(never)]
+    #[inline(always)]
     fn on_ret_snark_worker(
         &mut self,
         ret: i64,
@@ -535,7 +535,7 @@ impl App {
         }
     }
 
-    #[inline(never)]
+    #[inline(always)]
     fn on_ret(&mut self, ret: i64, data: context::Variant, ts0: u64, ts1: u64) -> Result<(), i32> {
         use core::ptr;
         use ebpf::helpers;

@@ -22,13 +22,13 @@ required-features = ["user"]
 
 [dependencies]
 ebpf-kern = { git = "https://github.com/vlad9486/ebpf-tools", optional = true }
-typenum = { version = "1.17", optional = true }
+typenum = { version = "1.19", optional = true }
 ebpf-user = { git = "https://github.com/vlad9486/ebpf-tools", optional = true }
-ctrlc = { version = "3.4.4", features = ["termination"], optional = true }
-log = { version = "0.4.22", optional = true }
-env_logger = { version = "0.11.3", default-features = false, optional = true }
+ctrlc = { version = "3.5.1", features = ["termination"], optional = true }
+log = { version = "0.4.29", optional = true }
+env_logger = { version = "0.11.8", default-features = false, optional = true }
 hex = { version = "0.4.3", optional = true }
-libbpf-sys = { version = "1.4.2", optional = true }
+libbpf-sys = { version = "1.6.2", optional = true }
 libc = { version = "0.2.155", optional = true }
 network-types = { version = "0.0.4", optional = true }
 

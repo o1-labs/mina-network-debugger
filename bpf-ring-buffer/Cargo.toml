@@ -8,5 +8,5 @@ license = "MIT"
 
 [dependencies]
 libc = "0.2.155"
-log = "0.4.22"
-epoll = { version = "4.3" }
+log = "0.4.29"
+epoll = { version = "4.4" }

@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 structopt = { version = "0.3.26" }
-env_logger = { version = "0.11.3", default-features = false }
+env_logger = { version = "0.11.8", default-features = false }
 anyhow = { version = "1.0" }
-time = { version = "0.3.36", features = ["parsing", "formatting"] }
+time = { version = "0.3.46", features = ["parsing", "formatting"] }
 
-log = { version = "0.4.22" }
+log = { version = "0.4.29" }
 reqwest = { version = "0.12.5", features = ["blocking"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }

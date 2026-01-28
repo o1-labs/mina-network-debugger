@@ -9,12 +9,12 @@ license = "MIT"
 [dependencies]
 # reqwest = { version = "0.11.13", features = ["blocking"] }
 # url = { version = "2.3.1" }
-env_logger = { version = "0.11.3", default-features = false }
-ctrlc = { version = "3.4.4" }
+env_logger = { version = "0.11.8", default-features = false }
+ctrlc = { version = "3.5.1" }
 
-tokio = { version = "1.38.0", features = ["rt-multi-thread"] }
+tokio = { version = "1.49.0", features = ["rt-multi-thread"] }
 warp = { version = "0.3.7", features = ["tls"] }
-log = { version = "0.4.22" }
+log = { version = "0.4.29" }
 thiserror = { version = "1.0" }
 
 rocksdb = { version = "0.21.0", default-features = false }

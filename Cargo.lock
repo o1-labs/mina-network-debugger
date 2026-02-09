@@ -1658,6 +1658,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "memoffset"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1887,9 +1896,12 @@ dependencies = [
 
 [[package]]
 name = "network-types"
-version = "0.0.4"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47e3fa362b3a5e3ccc59979cb7bd254e404be05bbc18270b05d1289cb8cb8f44"
+checksum = "f06f1863cb5565864300c6bfb012312969908878d2ca5881eaf0bbdb8b519c23"
+dependencies = [
+ "memoffset 0.9.1",
+]
 
 [[package]]
 name = "nix"

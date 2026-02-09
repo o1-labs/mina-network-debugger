@@ -12,7 +12,7 @@ repository = "https://github.com/vlad9486/radiation.git"
 proc-macro = true
 
 [dependencies]
-proc-macro2 = { version = "1.0" }
-syn = { version = "2.0", features = ["derive", "parsing"] }
-quote = { version = "1.0" }
-synstructure = { version = "0.13.1" }
+proc-macro2 = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+synstructure = { workspace = true }

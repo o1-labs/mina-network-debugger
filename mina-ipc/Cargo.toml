@@ -7,15 +7,15 @@ rust-version = "1.65.0"
 license = "MIT"
 
 [build-dependencies]
-capnpc = { version = "0.15.2" }
+capnpc = { workspace = true }
 
 [dependencies]
-crc64 = { version = "2.0" }
-mina-p2p-messages = { git = "https://github.com/openmina/openmina.git", rev = "6fb148ba06153a6497173e62bae1a67323fe5f92" }
-capnp = { version = "0.15.2" }
-blake2 = { version = "0.10.5" }
-hex = { version = "0.4.3" }
-serde = { version = "1.0" }
+crc64 = { workspace = true }
+mina-p2p-messages = { workspace = true }
+capnp = { workspace = true }
+blake2 = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
 
 [features]
 dump = []

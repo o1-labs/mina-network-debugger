@@ -11,6 +11,6 @@ repository = "https://github.com/vlad9486/ebpf-tools"
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0"
+proc-macro2 = { workspace = true }
 syn = { version = "1.0", features = ["derive", "parsing"] }
-quote = "1.0"
+quote = { workspace = true }

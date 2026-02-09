@@ -1,0 +1,28 @@
+[package]
+name = "radiation"
+version = "0.3.7"
+edition = "2021"
+authors = ["Vladislav Melnik <vladislav.melnik@protonmail.com>"]
+rust-version = "1.58.1"
+license = "MIT"
+description = "Convert Rust type into raw bytes and vice versa"
+
+[dependencies]
+nom = { version = "7.1" }
+hex = { version = "0.4.3" }
+
+tokio-util = { version = "0.7.10", features = ["codec"], optional = true }
+bytes = { version = "1.5", optional = true }
+
+pqcrypto-dilithium = { version = "0.5.0", optional = true }
+pqcrypto-traits = { version = "0.3.5", optional = true }
+
+radiation-macros = { path = "macros", version = "=0.3.1", optional = true }
+
+[features]
+default = ["derive", "std"]
+derive = ["radiation-macros"]
+nightly = []
+std = []
+codec = ["tokio-util/codec", "bytes"]
+dilithium = ["pqcrypto-dilithium", "pqcrypto-traits"]

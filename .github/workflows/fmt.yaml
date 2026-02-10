@@ -1,0 +1,30 @@
+name: Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+    types: [checks_requested]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          components: rustfmt
+          cache-prefix: fmt-v0
+
+      - name: Check format
+        run: make check-format

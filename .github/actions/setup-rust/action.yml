@@ -1,0 +1,30 @@
+name: 'Setup Rust Toolchain'
+description: 'Setup Rust toolchain with components and caching'
+inputs:
+  toolchain:
+    description: 'Rust toolchain version'
+    required: false
+    default: 'nightly-2026-01-20'
+  components:
+    description: 'Rust components to install'
+    required: false
+    default: 'rust-src, rustfmt, clippy'
+  cache-prefix:
+    description: 'Cache prefix key'
+    required: false
+    default: 'v0'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        components: ${{ inputs.components }}
+
+    - name: Setup Rust Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: ${{ inputs.cache-prefix }}-${{ inputs.toolchain }}
+        shared-key: shared-${{ inputs.toolchain }}
+        save-if: ${{ github.ref == 'refs/heads/main' }}

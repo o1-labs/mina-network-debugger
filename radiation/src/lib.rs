@@ -18,11 +18,11 @@ pub use nom;
 
 mod absorb;
 pub use self::absorb::{
-    Absorb, AbsorbExt, ParseError, ParseErrorKind, Limit, LimitDescriptor, LimitError,
+    Absorb, AbsorbExt, Limit, LimitDescriptor, LimitError, ParseError, ParseErrorKind,
 };
 
 mod emit;
-pub use self::emit::{RadiationBuffer, Emit};
+pub use self::emit::{Emit, RadiationBuffer};
 
 #[cfg(all(test, feature = "derive"))]
 mod tests;

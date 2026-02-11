@@ -1,7 +1,7 @@
 use super::{
-    recorder::Cx,
-    event::DirectedId,
     database::{DbGroup as Db, DbResult, StreamId},
+    event::DirectedId,
+    recorder::Cx,
 };
 
 pub trait DynamicProtocol {
@@ -15,10 +15,10 @@ pub trait HandleData {
 
 mod accumulator;
 
-pub mod pnet;
-pub mod multistream_select;
-pub mod noise;
-pub mod mux;
-pub mod mplex;
-pub mod yamux;
 pub mod mina_protocol;
+pub mod mplex;
+pub mod multistream_select;
+pub mod mux;
+pub mod noise;
+pub mod pnet;
+pub mod yamux;

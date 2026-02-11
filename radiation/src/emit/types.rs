@@ -1,4 +1,4 @@
-use std::net::{SocketAddr, IpAddr};
+use std::net::{IpAddr, SocketAddr};
 
 use super::core::Emit;
 

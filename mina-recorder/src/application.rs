@@ -1,8 +1,8 @@
 use std::{
-    env,
-    sync::{mpsc, Mutex, Arc},
     collections::BTreeMap,
+    env,
     net::{IpAddr, Ipv6Addr, SocketAddr},
+    sync::{mpsc, Arc, Mutex},
 };
 
 use ebpf_user::{
@@ -10,7 +10,7 @@ use ebpf_user::{
     HashMapRef,
 };
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Serialize)]
 pub struct StatsBlocked {
@@ -129,15 +129,11 @@ impl ApplicationServer {
             let src_ip = Ipv6Addr::from(<[u8; 16]>::try_from(&next_key[0..16]).unwrap());
             let src_ip = src_ip
                 .to_ipv4_mapped()
-                .map(IpAddr::from)
-                .unwrap_or(src_ip.into());
+                .map_or_else(|| IpAddr::from(src_ip), IpAddr::from);
             let src_port = u16::from_be_bytes(next_key[16..18].try_into().unwrap());
 
             let dst_ip = Ipv6Addr::from(<[u8; 16]>::try_from(&next_key[18..34]).unwrap());
-            let dst_ip = dst_ip
-                .to_ipv4_mapped()
-                .map(IpAddr::from)
-                .unwrap_or(src_ip.into());
+            let dst_ip = dst_ip.to_ipv4_mapped().map(IpAddr::from).unwrap_or(src_ip);
             let dst_port = u16::from_be_bytes(next_key[34..36].try_into().unwrap());
 
             let key = StatsItem {

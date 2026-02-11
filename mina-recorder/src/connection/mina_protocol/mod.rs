@@ -4,11 +4,11 @@ mod meshsub;
 mod rpc;
 
 use crate::{
-    database::{StreamId, StreamKind, ConnectionStats, DbStream},
+    database::{ConnectionStats, DbStream, StreamId, StreamKind},
     stats::update_block_stats,
 };
 
-use super::{HandleData, DirectedId, DynamicProtocol, Cx, Db, DbResult};
+use super::{Cx, Db, DbResult, DirectedId, DynamicProtocol, HandleData};
 
 pub struct State {
     stream_id: StreamId,

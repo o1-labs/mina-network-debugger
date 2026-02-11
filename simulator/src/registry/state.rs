@@ -1,11 +1,14 @@
-use std::{
-    net::{SocketAddr, IpAddr},
-    collections::BTreeMap, sync::{Arc, Mutex},
-};
 use serde::Serialize;
+use std::{
+    collections::BTreeMap,
+    net::{IpAddr, SocketAddr},
+    sync::{Arc, Mutex},
+};
 use tokio::sync::{mpsc, oneshot};
 
-use super::messages::{Registered, Summary, PeerInfo, NetReport, MockReport, DebuggerReport, MockSplitReport};
+use super::messages::{
+    DebuggerReport, MockReport, MockSplitReport, NetReport, PeerInfo, Registered, Summary,
+};
 use crate::{libp2p_helper::Process, peer::split_behavior};
 
 #[derive(Default)]
@@ -25,30 +28,42 @@ impl SplitContext {
     }
 
     // WARNING: reference to self is dangerous, this code is complicated, beware
-    pub fn request(&mut self, registered: usize, fr: IpAddr, se: Arc<Mutex<Self>>) -> oneshot::Receiver<()> {
-        use tokio::time;
+    pub fn request(
+        &mut self,
+        registered: usize,
+        fr: IpAddr,
+        se: Arc<Mutex<Self>>,
+    ) -> oneshot::Receiver<()> {
         use reqwest::blocking::ClientBuilder;
+        use tokio::time;
 
         let (tx, rx) = oneshot::channel();
         let sender = self.thread.get_or_insert_with(|| {
             let (ttx, mut trx) = mpsc::unbounded_channel();
             tokio::spawn(async move {
-                let client = ClientBuilder::new().timeout(split_behavior::time::REGISTRY_TIMEOUT).build()?;
+                let client = ClientBuilder::new()
+                    .timeout(split_behavior::time::REGISTRY_TIMEOUT)
+                    .build()?;
                 let mut requested = BTreeMap::<_, oneshot::Sender<()>>::default();
-                loop {
-                    match time::timeout(split_behavior::time::WAIT_TIMEOUT, trx.recv()).await {
-                        Ok(Some((addr, tx))) => {
-                            requested.insert(addr, tx);
-                            if requested.len() == registered {
-                                break;
-                            }
-                        }
-                        _ => break,
+                while let Ok(Some((addr, tx))) =
+                    time::timeout(split_behavior::time::WAIT_TIMEOUT, trx.recv()).await
+                {
+                    requested.insert(addr, tx);
+                    if requested.len() == registered {
+                        break;
                     }
                 }
 
-                let left = requested.keys().take(requested.len() / 2).cloned().collect::<Vec<_>>();
-                let right = requested.keys().skip(requested.len() / 2).cloned().collect::<Vec<_>>();
+                let left = requested
+                    .keys()
+                    .take(requested.len() / 2)
+                    .cloned()
+                    .collect::<Vec<_>>();
+                let right = requested
+                    .keys()
+                    .skip(requested.len() / 2)
+                    .cloned()
+                    .collect::<Vec<_>>();
 
                 let keys = requested.keys().cloned().collect::<Vec<_>>();
                 for tx in requested.into_values() {
@@ -112,9 +127,15 @@ impl State {
         self.build_number
     }
 
-    pub fn register(&mut self, addr: SocketAddr, build_number: u32, nodes: u32) -> anyhow::Result<Registered> {
-        let process = self.process.get_or_insert_with(|| match Process::spawn() {
-            (v, _) => v,
+    pub fn register(
+        &mut self,
+        addr: SocketAddr,
+        build_number: u32,
+        nodes: u32,
+    ) -> anyhow::Result<Registered> {
+        let process = self.process.get_or_insert_with(|| {
+            let (v, _) = Process::spawn();
+            v
         });
 
         if self.build_number != build_number {

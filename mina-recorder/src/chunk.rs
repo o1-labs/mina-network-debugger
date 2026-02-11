@@ -1,6 +1,6 @@
-use std::{fmt, time::SystemTime, io};
+use std::{fmt, io, time::SystemTime};
 
-use radiation::{Emit, Absorb, AbsorbExt};
+use radiation::{Absorb, AbsorbExt, Emit};
 use thiserror::Error;
 
 use crate::custom_coding;

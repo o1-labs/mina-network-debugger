@@ -1,4 +1,4 @@
-use super::{skeleton::MapRef, kind};
+use super::{kind, skeleton::MapRef};
 
 pub struct ArrayPerCpuRef<const V: usize>(MapRef);
 

@@ -1,16 +1,16 @@
-use std::{collections::BTreeMap, time::SystemTime, net::SocketAddr, sync::atomic::AtomicUsize};
+use std::{collections::BTreeMap, net::SocketAddr, sync::atomic::AtomicUsize, time::SystemTime};
 
+use libp2p_core::PeerId;
 use mina_p2p_messages::{gossip::GossipNetMessageV2, v2};
 use radiation::{Absorb, Emit};
-use libp2p_core::PeerId;
 
 use crate::{
+    database::{DbError, DbFacade},
     decode::{
-        meshsub_stats::{BlockStat, TxStat, Hash, Event, Signature, Tx, Snark},
         meshsub::{self, ControlIHave, ControlIWant},
+        meshsub_stats::{BlockStat, Event, Hash, Signature, Snark, Tx, TxStat},
         MessageType,
     },
-    database::{DbFacade, DbError},
 };
 
 #[derive(Default, Absorb, Emit)]
@@ -74,6 +74,7 @@ impl StatsState {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn observe(
         &mut self,
         message_id: u64,
@@ -165,24 +166,21 @@ impl StatsState {
                                     .iter()
                                     .flat_map(|x| x.commands.iter());
                                 for tx in it0.chain(it1) {
-                                    match &tx.data {
-                                        v2::MinaBaseUserCommandStableV2::SignedCommand(c) => {
-                                            let mut signature = Signature([0; 32], [0; 32]);
-                                            signature.0.clone_from_slice(c.signature.0.as_ref());
-                                            signature.1.clone_from_slice(c.signature.1.as_ref());
-                                            if let Some(tx_desc) = self.txs.remove(&signature) {
-                                                tx_stat.transactions.push(Tx {
-                                                    producer_id: tx_desc.producer_id,
-                                                    time: tx_desc.time,
-                                                    command: tx.clone(),
-                                                    latency: time
-                                                        .duration_since(tx_desc.time)
-                                                        .unwrap(),
-                                                });
-                                                tx_stat_updated = true;
-                                            }
+                                    if let v2::MinaBaseUserCommandStableV2::SignedCommand(c) =
+                                        &tx.data
+                                    {
+                                        let mut signature = Signature([0; 32], [0; 32]);
+                                        signature.0.clone_from_slice(c.signature.0.as_ref());
+                                        signature.1.clone_from_slice(c.signature.1.as_ref());
+                                        if let Some(tx_desc) = self.txs.remove(&signature) {
+                                            tx_stat.transactions.push(Tx {
+                                                producer_id: tx_desc.producer_id,
+                                                time: tx_desc.time,
+                                                command: tx.clone(),
+                                                latency: time.duration_since(tx_desc.time).unwrap(),
+                                            });
+                                            tx_stat_updated = true;
                                         }
-                                        _ => (),
                                     }
                                 }
                                 tx_stat.pending_txs =
@@ -242,18 +240,15 @@ impl StatsState {
                         }
                         GossipNetMessageV2::TransactionPoolDiff { message, .. } => {
                             for tx in &message.0 {
-                                match tx {
-                                    v2::MinaBaseUserCommandStableV2::SignedCommand(c) => {
-                                        let mut signature = Signature([0; 32], [0; 32]);
-                                        signature.0.clone_from_slice(c.signature.0.as_ref());
-                                        signature.1.clone_from_slice(c.signature.1.as_ref());
-                                        self.txs.entry(signature).or_insert_with(|| TxDesc {
-                                            time,
-                                            producer_id,
-                                            message_id,
-                                        });
-                                    }
-                                    _ => (),
+                                if let v2::MinaBaseUserCommandStableV2::SignedCommand(c) = tx {
+                                    let mut signature = Signature([0; 32], [0; 32]);
+                                    signature.0.clone_from_slice(c.signature.0.as_ref());
+                                    signature.1.clone_from_slice(c.signature.1.as_ref());
+                                    self.txs.entry(signature).or_insert_with(|| TxDesc {
+                                        time,
+                                        producer_id,
+                                        message_id,
+                                    });
                                 }
                             }
                         }
@@ -352,6 +347,7 @@ impl StatsState {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn update_block_stats(
     message_id: u64,
     msg: &[u8],
@@ -374,8 +370,8 @@ pub fn update_block_stats(
                 message,
                 hash,
                 ..
-            } => match message.as_ref() {
-                GossipNetMessageV2::NewState(block) => {
+            } => {
+                if let GossipNetMessageV2::NewState(block) = message.as_ref() {
                     let (block_height, global_slot) = {
                         let consensus_state = &block.header.protocol_state.body.consensus_state;
                         (
@@ -399,8 +395,7 @@ pub fn update_block_stats(
                     };
                     db.stats_block_v2(event)?;
                 }
-                _ => {}
-            },
+            }
             meshsub::Event::Control {
                 ihave: _,
                 iwant: _,

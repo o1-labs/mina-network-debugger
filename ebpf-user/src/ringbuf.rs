@@ -1,5 +1,5 @@
-use std::{time::Duration, mem::ManuallyDrop};
-use super::{skeleton::MapRef, kind};
+use super::{kind, skeleton::MapRef};
+use std::{mem::ManuallyDrop, time::Duration};
 
 pub struct RingBufferRef(MapRef);
 

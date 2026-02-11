@@ -946,12 +946,12 @@ impl App {
 
     #[inline(always)]
     fn disable_connections(&mut self, ctx: ebpf::xdp::Context) -> Result<ebpf::xdp::Action, i32> {
+        use ebpf::xdp::Action;
         use network_types::{
             eth::{EthHdr, EtherType},
-            ip::{Ipv4Hdr, Ipv6Hdr, IpProto},
+            ip::{IpProto, Ipv4Hdr, Ipv6Hdr},
             tcp::TcpHdr,
         };
-        use ebpf::xdp::Action;
 
         // fn debug(app: &mut App, v: u32) {
         //     let event = Event::new(0, 0, 0, 0);
@@ -1118,26 +1118,27 @@ impl App {
 fn main() {
     use std::{
         collections::{BTreeMap, BTreeSet},
+        env,
+        path::PathBuf,
         sync::{
             atomic::{AtomicBool, Ordering},
-            Arc, mpsc,
+            mpsc, Arc,
         },
-        time::{SystemTime, Duration},
-        env, thread,
-        path::PathBuf,
+        thread,
+        time::{Duration, SystemTime},
     };
 
     use bpf_recorder::{
-        sniffer_event::{SnifferEventVariant, SnifferEvent},
         proc,
+        sniffer_event::{SnifferEvent, SnifferEventVariant},
     };
-    use simulator::registry::messages::{DebuggerReport, ConnectionMetadata};
     use bpf_ring_buffer::RingBuffer;
-    use mina_recorder::{
-        EventMetadata, ConnectionInfo, server, P2pRecorder, libp2p_helper::CapnpReader,
-        SnarkWorkerState, application,
-    };
     use ebpf::{kind::AppItem, Skeleton};
+    use mina_recorder::{
+        application, libp2p_helper::CapnpReader, server, ConnectionInfo, EventMetadata,
+        P2pRecorder, SnarkWorkerState,
+    };
+    use simulator::registry::messages::{ConnectionMetadata, DebuggerReport};
 
     fn watch_pid(pid: u32, terminating: Arc<AtomicBool>) {
         thread::spawn(move || loop {
@@ -1227,11 +1228,8 @@ fn main() {
         }
     };
 
-    let (app_client, app_server) = application::new(
-        app.whitelist.clone(),
-        app.whitelist_ports.clone(),
-        app.blocked.clone(),
-    );
+    let (app_client, app_server) =
+        application::new(app.whitelist, app.whitelist_ports, app.blocked);
 
     let (main_tx, main_rx) = mpsc::channel();
     let main_thread = thread::spawn({
@@ -1346,16 +1344,15 @@ fn main() {
                 SnifferEventVariant::NewApp(alias) => {
                     log::info!("exec {alias} pid: {}", event.pid);
                     recorder.on_alias(event.pid, alias);
-                    if !watching.contains_key(&event.pid) {
+                    if let std::collections::btree_map::Entry::Vacant(entry) =
+                        watching.entry(event.pid)
+                    {
                         let version = env!("GIT_HASH");
-                        watching.insert(
-                            event.pid,
-                            DebuggerReport {
-                                version: version.to_owned(),
-                                ipc: Default::default(),
-                                network: vec![],
-                            },
-                        );
+                        entry.insert(DebuggerReport {
+                            version: version.to_owned(),
+                            ipc: Default::default(),
+                            network: vec![],
+                        });
                         if env::var("TERMINATE").is_ok() {
                             watch_pid(event.pid, terminating.clone());
                         }
@@ -1526,9 +1523,9 @@ fn main() {
                         continue;
                     }
                     if event.fd == 0 || event.fd == 1 {
-                        watching
-                            .get_mut(&event.pid)
-                            .map(|report| report.ipc.0 += &data);
+                        if let Some(report) = watching.get_mut(&event.pid) {
+                            report.ipc.0 += &data;
+                        }
 
                         let key = (event.pid, true);
                         if capnp_blacklist.contains(&key) {
@@ -1558,16 +1555,15 @@ fn main() {
                     }
                     let key = (event.pid, event.fd);
                     if let Some(addr) = p2p_cns.get(&key) {
-                        watching
-                            .get_mut(&event.pid)
-                            .and_then(|report| {
-                                report
-                                    .network
-                                    .iter_mut()
-                                    .rev()
-                                    .find(|cn| addr.ip() == cn.ip && event.fd == cn.fd as u32)
-                            })
-                            .map(|connection| connection.checksum.0 += &data);
+                        if let Some(connection) = watching.get_mut(&event.pid).and_then(|report| {
+                            report
+                                .network
+                                .iter_mut()
+                                .rev()
+                                .find(|cn| addr.ip() == cn.ip && event.fd == cn.fd as u32)
+                        }) {
+                            connection.checksum.0 += &data;
+                        }
 
                         let metadata = EventMetadata {
                             id: ConnectionInfo {
@@ -1595,9 +1591,9 @@ fn main() {
                         continue;
                     }
                     if event.fd == 0 || event.fd == 1 {
-                        watching
-                            .get_mut(&event.pid)
-                            .map(|report| report.ipc.1 += &data);
+                        if let Some(report) = watching.get_mut(&event.pid) {
+                            report.ipc.1 += &data;
+                        }
 
                         let key = (event.pid, false);
                         if capnp_blacklist.contains(&key) {
@@ -1627,16 +1623,15 @@ fn main() {
                     }
                     let key = (event.pid, event.fd);
                     if let Some(addr) = p2p_cns.get(&key) {
-                        watching
-                            .get_mut(&event.pid)
-                            .and_then(|report| {
-                                report
-                                    .network
-                                    .iter_mut()
-                                    .rev()
-                                    .find(|cn| addr.ip() == cn.ip && event.fd == cn.fd as u32)
-                            })
-                            .map(|connection| connection.checksum.1 += &data);
+                        if let Some(connection) = watching.get_mut(&event.pid).and_then(|report| {
+                            report
+                                .network
+                                .iter_mut()
+                                .rev()
+                                .find(|cn| addr.ip() == cn.ip && event.fd == cn.fd as u32)
+                        }) {
+                            connection.checksum.1 += &data;
+                        }
                         let metadata = EventMetadata {
                             id: ConnectionInfo {
                                 addr: *addr,

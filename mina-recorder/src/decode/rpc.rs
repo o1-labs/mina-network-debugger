@@ -1,12 +1,11 @@
 use std::io::{Cursor, Read};
 
-use serde::Serialize;
 use mina_p2p_messages::{
     binprot::{BinProtRead, Nat0},
-    JSONifyPayloadRegistry, utils,
-    rpc_kernel::{QueryHeader, JSONinifyError},
-    JSONinifyPayloadReader,
+    rpc_kernel::{JSONinifyError, QueryHeader},
+    utils, JSONifyPayloadRegistry, JSONinifyPayloadReader,
 };
+use serde::Serialize;
 
 use super::{DecodeError, MessageType};
 
@@ -69,7 +68,7 @@ pub fn parse(bytes: Vec<u8>, preview: bool) -> Result<serde_json::Value, DecodeE
     let reader = None
         .or_else(|| v2.get(&tag, msg.version))
         .or_else(|| v1.get(&tag, msg.version))
-        .unwrap_or_else(|| &DefaultReader);
+        .unwrap_or(&DefaultReader);
     match d {
         1 => {
             if preview {

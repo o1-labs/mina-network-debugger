@@ -1,12 +1,12 @@
-use std::{thread, path::Path};
+use std::{path::Path, thread};
 
 use warp::{
-    Filter, Rejection, Reply,
-    reply::{WithStatus, Json, self},
     http::StatusCode,
+    reply::{self, Json, WithStatus},
+    Filter, Rejection, Reply,
 };
 
-use crate::{meshsub_stats::BlockStat, application::Application};
+use crate::{application::Application, meshsub_stats::BlockStat};
 
 use super::database::{DbCore, DbFacade, Params};
 
@@ -407,7 +407,7 @@ where
     R: AsRef<Path>,
 {
     use std::process;
-    use tokio::{sync::oneshot, runtime::Runtime};
+    use tokio::{runtime::Runtime, sync::oneshot};
 
     let rt = match Runtime::new() {
         Ok(v) => v,

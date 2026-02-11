@@ -1,8 +1,8 @@
 use std::io::{Read, Write};
 
 fn main() {
-    use std::{env, fs::File};
     use mina_recorder::meshsub;
+    use std::{env, fs::File};
 
     let arg = env::args().nth(1).unwrap();
     let mut file = File::open(&arg).unwrap();

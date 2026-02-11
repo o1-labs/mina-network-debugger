@@ -2,8 +2,8 @@ use std::net::SocketAddr;
 
 use radiation::{Absorb, Emit};
 
-use crate::{decode::MessageType, custom_coding};
 use super::types::{ConnectionId, MessageId, StreamFullId, StreamKind};
+use crate::{custom_coding, decode::MessageType};
 
 #[derive(Absorb, Emit)]
 pub struct AddressIdx {

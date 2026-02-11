@@ -1,7 +1,7 @@
 use std::{env, fs, io::Read, time::Duration};
 
 use mina_recorder::{
-    P2pRecorder, database::DbFacade, EventMetadata, ChunkHeader, ConnectionInfo, EncryptionStatus,
+    database::DbFacade, ChunkHeader, ConnectionInfo, EncryptionStatus, EventMetadata, P2pRecorder,
 };
 use radiation::AbsorbExt;
 

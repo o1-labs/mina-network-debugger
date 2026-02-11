@@ -1,4 +1,4 @@
-use core::{ptr, ffi::c_void};
+use core::{ffi::c_void, ptr};
 
 use super::helpers;
 
@@ -10,6 +10,7 @@ pub struct ArrayPerCpu<const VALUE_SIZE: usize, const MAX_ENTRIES: usize> {
     max_entries: *mut [u32; MAX_ENTRIES],
 }
 
+#[allow(clippy::new_without_default)]
 impl<const V: usize, const M: usize> ArrayPerCpu<V, M> {
     pub const fn new() -> Self {
         ArrayPerCpu {
@@ -73,6 +74,7 @@ pub struct HashMap<const KEY_SIZE: usize, const VALUE_SIZE: usize, const MAX_ENT
     max_entries: *mut [u32; MAX_ENTRIES],
 }
 
+#[allow(clippy::new_without_default)]
 impl<const K: usize, const V: usize, const M: usize> HashMap<K, V, M> {
     pub const fn new() -> Self {
         HashMap {
@@ -127,6 +129,7 @@ impl<const K: usize, const V: usize> HashMapRef<K, V> {
     }
 
     #[inline(always)]
+    #[allow(clippy::mut_from_ref)]
     pub fn get_mut_unsafe<T>(&self, key: &[u8; K]) -> Option<&mut T> {
         let key = key as *const [u8] as *const u8 as *const _;
         unsafe {
@@ -185,7 +188,7 @@ impl<const K: usize, const V: usize> HashMapRef<K, V> {
                 } else {
                     Err(c as _)
                 }
-            },
+            }
             None => Ok(None),
         }
     }
@@ -203,7 +206,7 @@ impl<const K: usize, const V: usize> HashMapRef<K, V> {
                 } else {
                     Err(c as _)
                 }
-            },
+            }
             None => Ok(None),
         }
     }

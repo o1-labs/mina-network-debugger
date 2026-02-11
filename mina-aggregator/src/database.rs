@@ -1,21 +1,21 @@
 use std::{
-    sync::{Arc, Mutex},
     collections::BTreeMap,
-    time::SystemTime,
     net::SocketAddr,
     path::Path,
+    sync::{Arc, Mutex},
+    time::SystemTime,
 };
 
+use libp2p_core::PeerId;
 use radiation::{Absorb, Emit};
 use serde::Serialize;
-use libp2p_core::PeerId;
 
 use mina_recorder::{
-    meshsub_stats::{Event, Hash},
     custom_coding,
+    meshsub_stats::{Event, Hash},
 };
 
-use super::rocksdb::{DbInner, DbError};
+use super::rocksdb::{DbError, DbInner};
 
 #[derive(Serialize, Clone, Absorb, Emit)]
 pub struct GlobalBlockState {

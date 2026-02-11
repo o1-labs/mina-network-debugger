@@ -1,10 +1,10 @@
 use core::marker::PhantomData;
 use std::io;
 
-use tokio_util::codec::{Encoder, Decoder};
 use bytes::BytesMut;
+use tokio_util::codec::{Decoder, Encoder};
 
-use super::{Absorb, ParseError, Emit, RadiationBuffer};
+use super::{Absorb, Emit, ParseError, RadiationBuffer};
 
 impl RadiationBuffer for BytesMut {
     fn pos(&self) -> usize {

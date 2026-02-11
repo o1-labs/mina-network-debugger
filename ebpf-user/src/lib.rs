@@ -4,7 +4,7 @@ pub use ebpf_user_macros::*;
 pub use cty;
 
 mod skeleton;
-pub use self::skeleton::{MapRef, ProgRef, Skeleton, SkeletonEmpty, BpfApp};
+pub use self::skeleton::{BpfApp, MapRef, ProgRef, Skeleton, SkeletonEmpty};
 
 mod map;
 pub use self::map::{ArrayPerCpuRef, HashMapRef};

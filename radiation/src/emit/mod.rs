@@ -1,10 +1,10 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use super::{DynSized, Collection};
+use super::{Collection, DynSized};
 
 mod core;
-pub use self::core::{RadiationBuffer, Emit};
+pub use self::core::{Emit, RadiationBuffer};
 
 mod primitives;
 

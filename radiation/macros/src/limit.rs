@@ -5,10 +5,10 @@ use super::find_attr;
 
 pub fn derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
     use syn::{
-        parse::{Parse, ParseStream},
-        Result, Ident, Token,
         ext::IdentExt,
+        parse::{Parse, ParseStream},
         spanned::Spanned,
+        Ident, Result, Token,
     };
 
     struct Limit {

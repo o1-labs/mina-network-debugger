@@ -1,8 +1,9 @@
 use std::{
-    net::{TcpListener, TcpStream},
+    fs,
     io::{Read, Write},
+    net::{TcpListener, TcpStream},
     sync::Arc,
-    thread, fs,
+    thread,
     time::Duration,
 };
 

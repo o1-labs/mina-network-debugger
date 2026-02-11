@@ -1,4 +1,4 @@
-use syn::{Data, DeriveInput, parse_macro_input};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 #[proc_macro_derive(BpfApp, attributes(license, hashmap, array_percpu, ringbuf, prog))]
 pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

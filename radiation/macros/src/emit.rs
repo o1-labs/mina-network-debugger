@@ -1,7 +1,7 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use super::{Tags, find_attr};
+use super::{find_attr, Tags};
 
 pub fn derive(s: synstructure::Structure) -> proc_macro2::TokenStream {
     let (tags, tag_ty) = match Tags::new(&s) {

@@ -6,7 +6,11 @@ use std::{
     thread,
 };
 
-use mina_ipc::message::{incoming, outgoing::{self, Peer}, ChecksumIo, ChecksumPair, Config};
+use mina_ipc::message::{
+    incoming,
+    outgoing::{self, Peer},
+    ChecksumIo, ChecksumPair, Config,
+};
 
 pub struct Process {
     this: Child,
@@ -98,6 +102,7 @@ impl Process {
         )
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn generate_keypair(&mut self) -> mina_ipc::Result<Option<(String, Vec<u8>, Vec<u8>)>> {
         self.stdin
             .lock()

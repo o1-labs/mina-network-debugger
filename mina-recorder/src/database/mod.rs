@@ -1,7 +1,7 @@
 mod types;
 pub use self::types::{
-    StreamKind, StreamId, ConnectionId, ConnectionStats, FullMessage, CapnpEventWithMetadata,
-    CapnpEventWithMetadataKey,
+    CapnpEventWithMetadata, CapnpEventWithMetadataKey, ConnectionId, ConnectionStats, FullMessage,
+    StreamId, StreamKind,
 };
 
 mod rocksdb;
@@ -19,6 +19,6 @@ pub use self::index::LedgerHash;
 mod sorted_intersect;
 
 mod core;
-pub use self::core::{DbError, DbCore, RandomnessDatabase};
+pub use self::core::{DbCore, DbError, RandomnessDatabase};
 
 pub type DbResult<T> = Result<T, DbError>;

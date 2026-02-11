@@ -1,20 +1,20 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use core::str;
 use alloc::{
-    string::{String, ToString},
     boxed::Box,
+    string::{String, ToString},
     vec::Vec,
 };
+use core::str;
 
-use nom::{IResult, combinator, number, multi};
+use nom::{combinator, multi, number, IResult};
 
 use super::{
     core::Absorb,
     error::{ParseError, ParseErrorKind},
     limit::Limit,
-    DynSized, Collection,
+    Collection, DynSized,
 };
 
 impl<'pa> Absorb<'pa> for usize {
@@ -70,9 +70,8 @@ where
     T: Absorb<'pa>,
 {
     use nom::{
-        InputLength,
         error::{ErrorKind, ParseError as _},
-        Err,
+        Err, InputLength,
     };
 
     move |mut input| {

@@ -1,8 +1,8 @@
-use std::{collections::BTreeMap, borrow::Cow, task::Poll, fmt};
+use std::{borrow::Cow, collections::BTreeMap, fmt, task::Poll};
 
 use crate::database::StreamKind;
 
-use super::{HandleData, DirectedId, DynamicProtocol, Cx, Db, DbResult, StreamId};
+use super::{Cx, Db, DbResult, DirectedId, DynamicProtocol, HandleData, StreamId};
 
 #[derive(Default)]
 pub struct State<Inner> {
@@ -39,7 +39,7 @@ impl<Inner> AsMut<Inner> for Status<Inner> {
 }
 
 mod acc {
-    use std::{borrow::Cow, task::Poll, cmp::Ordering, mem};
+    use std::{borrow::Cow, cmp::Ordering, mem, task::Poll};
 
     use unsigned_varint::decode;
 

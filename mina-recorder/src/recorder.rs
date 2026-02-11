@@ -1,21 +1,21 @@
 use std::{
     collections::BTreeMap,
-    time::SystemTime,
-    net::{SocketAddr, IpAddr},
-    sync::{Arc, mpsc},
+    net::{IpAddr, SocketAddr},
+    sync::{mpsc, Arc},
     thread::{self, JoinHandle},
+    time::SystemTime,
 };
 
-use serde::Serialize;
 use parking_lot::Mutex;
+use serde::Serialize;
 
 use super::{
-    event::{EventMetadata, ConnectionInfo, DirectedId},
-    connection::{HandleData, pnet, multistream_select, noise, mux, mina_protocol},
+    connection::{mina_protocol, multistream_select, mux, noise, pnet, HandleData},
     database::{DbFacade, DbGroup},
+    event::{ConnectionInfo, DirectedId, EventMetadata},
     key_recover::KeyGeneratorWithCache,
-    tester::Tester,
     stats::{Stats, StatsState},
+    tester::Tester,
 };
 
 type Cn = pnet::State<Noise>;
@@ -81,7 +81,7 @@ impl Cx {
             .lock()
             .get(&pid)
             .as_ref()
-            .map(|(_, addr)| addr.clone())
+            .map(|(_, addr)| *addr)
             .unwrap_or(SocketAddr::new(IpAddr::V4(0.into()), 0))
     }
 }
@@ -160,11 +160,9 @@ impl P2pRecorder {
     }
 
     pub fn set_port(&mut self, pid: u32, port: u16) {
-        self.cx
-            .apps
-            .lock()
-            .get_mut(&pid)
-            .map(|(_, addr)| addr.set_port(port));
+        if let Some((_, addr)) = self.cx.apps.lock().get_mut(&pid) {
+            addr.set_port(port);
+        }
     }
 
     pub fn on_alias(&mut self, pid: u32, alias: String) {
@@ -354,7 +352,7 @@ impl P2pRecorder {
         log::debug!(
             "{hour:02}:{minute:02}:{second:02}:{nano:09} {pid} random: {} {}",
             bytes.len(),
-            hex::encode(&bytes),
+            hex::encode(bytes),
         );
         if let Err(err) = self.cx.db.add_randomness(bytes) {
             log::error!("failed to store randomness: {err}");

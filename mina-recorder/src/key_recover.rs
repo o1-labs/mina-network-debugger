@@ -1,10 +1,10 @@
+use curve25519_dalek::{
+    constants::ED25519_BASEPOINT_TABLE, montgomery::MontgomeryPoint, scalar::Scalar,
+};
 use parking_lot::Mutex;
 use sha3::{
     digest::{core_api::XofReaderCoreWrapper, ExtendableOutput, Update, XofReader},
     Shake256, Shake256ReaderCore,
-};
-use curve25519_dalek::{
-    montgomery::MontgomeryPoint, constants::ED25519_BASEPOINT_TABLE, scalar::Scalar,
 };
 
 use super::database::{DbCore, RandomnessDatabase};
@@ -95,39 +95,38 @@ impl RandomnessDatabase for KeyGeneratorWithCache {
 impl KeyDatabase for KeyGeneratorWithCache {
     fn reproduced_sk<const EPHEMERAL: bool>(&self, pk: [u8; 32]) -> Option<[u8; 32]> {
         // try lookup the key
-        self.db
-            .get_sk(&pk)
-            .ok()?
-            .and_then(|x| x.try_into().ok())
-            .or_else(|| {
-                let point = MontgomeryPoint(pk);
-                if let Some(mut g) = self.generators.lock().take() {
-                    g.part::<EPHEMERAL>()
-                        .find(point, |pk, sk| {
-                            self.db
-                                .put_sk(pk.to_bytes(), sk.to_bytes())
-                                .unwrap_or_default()
-                        })
-                        .inspect(|_| *self.generators.lock() = Some(g))
-                } else {
-                    // find a seed
-                    log::info!("searching seed");
-                    self.db
-                        .iterate_randomness()
-                        .take(8)
-                        .filter_map(|x| <[u8; 32]>::try_from(x.to_vec()).ok())
-                        .find_map(|seed_candidate| {
-                            log::info!("try seed candidate: {}", hex::encode(seed_candidate));
-                            KeyGenerators::new(seed_candidate)
-                                .part::<EPHEMERAL>()
-                                .find(point, |_, _| ())
-                                .inspect(|_| {
-                                    log::info!("found seed");
-                                    *self.generators.lock() =
-                                        Some(KeyGenerators::new(seed_candidate));
-                                })
-                        })
-                }
-            })
+        self.db.get_sk(&pk).ok()?.or_else(|| {
+            let point = MontgomeryPoint(pk);
+            if let Some(mut g) = self.generators.lock().take() {
+                g.part::<EPHEMERAL>()
+                    .find(point, |pk, sk| {
+                        self.db
+                            .put_sk(pk.to_bytes(), sk.to_bytes())
+                            .unwrap_or_default()
+                    })
+                    .map(|sk| {
+                        *self.generators.lock() = Some(g);
+                        sk
+                    })
+            } else {
+                // find a seed
+                log::info!("searching seed");
+                self.db
+                    .iterate_randomness()
+                    .take(8)
+                    .filter_map(|x| <[u8; 32]>::try_from(x.to_vec()).ok())
+                    .find_map(|seed_candidate| {
+                        log::info!("try seed candidate: {}", hex::encode(seed_candidate));
+                        KeyGenerators::new(seed_candidate)
+                            .part::<EPHEMERAL>()
+                            .find(point, |_, _| ())
+                            .map(|sk| {
+                                log::info!("found seed");
+                                *self.generators.lock() = Some(KeyGenerators::new(seed_candidate));
+                                sk
+                            })
+                    })
+            }
+        })
     }
 }

@@ -1,11 +1,11 @@
 use std::{
-    process::{Command, Child, Stdio},
-    fs,
-    net::{SocketAddr, IpAddr},
-    time::SystemTime,
-    thread::{self, JoinHandle},
-    io::Read,
     collections::BTreeMap,
+    fs,
+    io::Read,
+    net::{IpAddr, SocketAddr},
+    process::{Child, Command, Stdio},
+    thread::{self, JoinHandle},
+    time::SystemTime,
 };
 
 use crate::registry::{messages::NetReport, server};
@@ -61,8 +61,7 @@ impl TcpFlow {
                 .root_element()
                 .children()
                 .filter(|x| x.tag_name().name() == "configuration")
-                .map(|x| x.children())
-                .flatten()
+                .flat_map(|x| x.children())
                 .filter(|x| {
                     let size = x
                         .children()
@@ -77,8 +76,7 @@ impl TcpFlow {
                     Some((filesize, tcpflow))
                 })
                 .filter_map(|(filesize, x)| {
-                    use time::format_description::well_known::Iso8601;
-                    use time::PrimitiveDateTime;
+                    use time::{format_description::well_known::Iso8601, PrimitiveDateTime};
 
                     let a = || x.attributes();
                     let start_time = a().find(|x| x.name() == "startime")?.value();

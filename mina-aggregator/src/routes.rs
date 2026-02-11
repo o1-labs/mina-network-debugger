@@ -1,9 +1,9 @@
 use mina_recorder::meshsub_stats::Event;
 use serde::Deserialize;
 use warp::{
-    Filter, Rejection, Reply,
-    reply::{WithStatus, Json, self},
     http::StatusCode,
+    reply::{self, Json, WithStatus},
+    Filter, Rejection, Reply,
 };
 
 use super::database::Database;

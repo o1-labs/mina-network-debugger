@@ -1,4 +1,4 @@
-use core::sync::atomic::{AtomicUsize, Ordering, AtomicU64, AtomicI64};
+use core::sync::atomic::{AtomicI64, AtomicU64, AtomicUsize, Ordering};
 
 use super::core::Emit;
 

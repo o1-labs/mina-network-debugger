@@ -1,26 +1,26 @@
 use std::{
+    net::SocketAddr,
     path::Path,
-    time::SystemTime,
     sync::{
         atomic::{
             AtomicU64,
-            Ordering::{SeqCst, self},
+            Ordering::{self, SeqCst},
         },
         Arc,
     },
-    net::SocketAddr,
+    time::SystemTime,
 };
 
 use itertools::Itertools;
 use radiation::Emit;
 
 use crate::{
-    event::{ConnectionInfo, DirectedId},
     chunk::{ChunkHeader, EncryptionStatus},
     decode::{
-        MessageType,
         meshsub_stats::{BlockStat, TxStat},
+        MessageType,
     },
+    event::{ConnectionInfo, DirectedId},
     meshsub_stats::Event,
 };
 
@@ -29,7 +29,7 @@ use crate::strace::StraceLine;
 
 use super::{
     core::{DbCore, DbError},
-    types::{Connection, ConnectionId, Message, MessageId, StreamId, StreamKind, ConnectionStats},
+    types::{Connection, ConnectionId, ConnectionStats, Message, MessageId, StreamId, StreamKind},
 };
 
 pub struct DbFacade {

@@ -1,12 +1,12 @@
 use std::{
-    net::SocketAddr,
     fmt,
-    time::{SystemTime, Duration},
+    net::SocketAddr,
+    time::{Duration, SystemTime},
 };
 
-use radiation::{Emit, Absorb};
+use radiation::{Absorb, Emit};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::custom_coding;
 

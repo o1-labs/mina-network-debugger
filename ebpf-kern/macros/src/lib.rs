@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro2::Literal;
 use syn::{
-    Data, DeriveInput, Lit, parse_macro_input, Attribute, Ident, Error, Type, PathArguments, Expr,
+    parse_macro_input, Attribute, Data, DeriveInput, Error, Expr, Ident, Lit, PathArguments, Type,
 };
 
 #[proc_macro]
@@ -13,7 +13,7 @@ pub fn license(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             return Error::new(l.span(), "Expected string literal")
                 .to_compile_error()
                 .into();
-        },
+        }
     };
     let license = l + "\u{0}";
     let license_len = license.len();
@@ -51,23 +51,23 @@ pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 
     fn generic_const(ty: &Type) -> Result<impl Iterator<Item = &'_ Expr> + '_, Error> {
         match ty {
-            &Type::Path(ref path) => {
+            Type::Path(path) => {
                 let e = Error::new_spanned(path, "not enough path segments");
                 match &path.path.segments.last().ok_or(e)?.arguments {
-                    &PathArguments::AngleBracketed(ref args) => {
+                    PathArguments::AngleBracketed(args) => {
                         let it = args.args.iter().filter_map(|arg| match arg {
                             syn::GenericArgument::Const(e) => Some(e),
                             _ => None,
                         });
                         Ok(it)
-                    },
+                    }
                     a => {
                         let msg = "expected angle bracketed argument \
                             like `<'a, T>` in `std::slice::iter<'a, T>`";
                         Err(Error::new_spanned(a, msg))
-                    },
+                    }
                 }
-            },
+            }
             ty => Err(Error::new_spanned(
                 ty,
                 "expected path like `std::slice::Iter`",
@@ -121,7 +121,7 @@ pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream
                         #name_ident: ebpf_kern::RingBufferRef::new(&mut #name_ident),
                     },
                 })
-            },
+            }
             "array_percpu" => {
                 let AttributeRingbuf { size } = attribute.parse_args()?;
                 let mut it = generic_const(ty)?;
@@ -140,7 +140,7 @@ pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream
                         #name_ident: ebpf_kern::ArrayPerCpuRef::new(&mut #name_ident),
                     },
                 })
-            },
+            }
             "hashmap" => {
                 let AttributeRingbuf { size } = attribute.parse_args()?;
                 let mut it = generic_const(ty)?;
@@ -160,7 +160,7 @@ pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream
                         #name_ident: ebpf_kern::HashMapRef::new(&mut #name_ident),
                     },
                 })
-            },
+            }
             "prog" => {
                 if let Lit::Str(l) = attribute.parse_args()? {
                     Ok(KernelTokens {
@@ -205,7 +205,7 @@ pub fn derive_bpf_app(input: proc_macro::TokenStream) -> proc_macro::TokenStream
                         "expected string literal",
                     ))
                 }
-            },
+            }
             _ => Ok(KernelTokens {
                 decl: quote::quote! {},
                 new_field: quote::quote! {},

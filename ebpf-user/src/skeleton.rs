@@ -1,5 +1,5 @@
-use std::ptr;
 use super::kind;
+use std::ptr;
 
 #[derive(Clone, Copy)]
 pub struct MapRef {
@@ -89,8 +89,8 @@ where
 {
     pub fn open(name: &'static str, code: &'static [u8]) -> Result<Self, i32> {
         use std::{
+            alloc::{alloc_zeroed, Layout},
             mem, slice,
-            alloc::{Layout, alloc_zeroed},
         };
 
         let mut app = Box::new(App::instance());

@@ -1,30 +1,32 @@
 use std::{
+    fs,
     net::IpAddr,
-    time::{Duration, SystemTime},
     path::Path,
-    fs, thread,
     sync::mpsc,
+    thread,
+    time::{Duration, SystemTime},
 };
 
 use mina_ipc::message::{
-    Config,
     outgoing::{self, PushMessage},
-    ConsensusMessage,
+    Config, ConsensusMessage,
 };
 use reqwest::{
+    blocking::{Client, ClientBuilder},
     Url,
-    blocking::{ClientBuilder, Client},
 };
 
-use crate::registry::{
-    server,
-    messages::{Registered, MockReport},
+use crate::{
+    libp2p_helper::Process,
+    registry::{
+        messages::{MockReport, Registered},
+        server,
+    },
 };
-use crate::libp2p_helper::Process;
 
 use super::{
     tcpflow::TcpFlow,
-    tests::{self, TestReport, DbEventWithMetadata, GossipNetMessageV2Short, DbEvent},
+    tests::{self, DbEvent, DbEventWithMetadata, GossipNetMessageV2Short, TestReport},
 };
 
 pub const PEER_PORT: u16 = 8302;
@@ -57,7 +59,7 @@ pub fn run(
         Ok(v) => v,
         Err(err) => {
             process.stop()?;
-            return Err(err.into());
+            return Err(err);
         }
     };
 
@@ -148,11 +150,7 @@ fn run_inner(
             match msg {
                 outgoing::PushMessage::GossipReceived {
                     subscription_id: 0,
-                    peer: outgoing::Peer {
-                        id,
-                        host,
-                        port,
-                    },
+                    peer: outgoing::Peer { id, host, port },
                     data,
                 } => match ConsensusMessage::from_bytes(&data).unwrap() {
                     ConsensusMessage::Test(msg) => {
@@ -202,7 +200,7 @@ fn run_inner(
     for slot in 0..blocks {
         thread::sleep(Duration::from_secs(delay as u64));
         // chance is 1 per nodes number
-        if rand::random::<usize>() < usize::MAX / ((20.0 as f32).sqrt() as usize) {
+        if rand::random::<usize>() < usize::MAX / (20.0_f32.sqrt() as usize) {
             let msg_str = format!("test message, id: {this_addr}, slot: {slot}");
             log::info!("worker {this_addr} publish msg: {msg_str}");
             let msg = ConsensusMessage::Test(msg_str);

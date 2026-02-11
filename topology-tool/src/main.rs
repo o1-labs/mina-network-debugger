@@ -1,12 +1,12 @@
 use std::{
-    time::Duration,
+    collections::{BTreeMap, BTreeSet},
     net::IpAddr,
-    collections::{BTreeSet, BTreeMap},
+    time::Duration,
 };
 
 use reqwest::{
+    blocking::{Client, ClientBuilder},
     Url,
-    blocking::{ClientBuilder, Client},
 };
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
@@ -84,7 +84,11 @@ struct NodeInfo {
 
 impl NodeInfo {
     pub fn left(&self) -> bool {
-        self.name.bytes().last().unwrap_or_default() % 2 == 0
+        self.name
+            .bytes()
+            .last()
+            .unwrap_or_default()
+            .is_multiple_of(2)
     }
 }
 
@@ -156,12 +160,12 @@ fn enable_firewall(client: &Client, url: String, graph: &[NodeInfo]) {
 
     let (left, left_names) = graph
         .iter()
-        .filter_map(|x| if x.left() { Some(x) } else { None })
+        .filter(|x| x.left())
         .map(|x| (x.ip, x.name.clone()))
         .unzip::<_, _, Vec<_>, Vec<_>>();
     let (right, right_names) = graph
         .iter()
-        .filter_map(|x| if !x.left() { Some(x) } else { None })
+        .filter(|x| !x.left())
         .map(|x| (x.ip, x.name.clone()))
         .unzip::<_, _, Vec<_>, Vec<_>>();
 
@@ -224,7 +228,7 @@ fn query_peer(client: &Client, url: &str, name: &str) -> anyhow::Result<NodeInfo
     }
 
     let response = client
-        .post(graphql_url(url, &name))
+        .post(graphql_url(url, name))
         .body(r#"{"query":"query MyQuery { daemonStatus { addrsAndPorts { externalIp } } }"}"#)
         .header("content-type", "application/json")
         .send()?
@@ -236,7 +240,7 @@ fn query_peer(client: &Client, url: &str, name: &str) -> anyhow::Result<NodeInfo
     };
 
     let response = client
-        .post(graphql_url(url, &name))
+        .post(graphql_url(url, name))
         .body(r#"{"query":"query MyQuery { getPeers { host } }"}"#)
         .header("content-type", "application/json")
         .send()?
@@ -248,6 +252,7 @@ fn query_peer(client: &Client, url: &str, name: &str) -> anyhow::Result<NodeInfo
     };
 
     #[derive(Deserialize)]
+    #[allow(dead_code)]
     pub struct CapnpTableRow {
         pub time_microseconds: u64,
         pub real_time_microseconds: u64,
@@ -264,7 +269,7 @@ fn query_peer(client: &Client, url: &str, name: &str) -> anyhow::Result<NodeInfo
     }
 
     let response = client
-        .get(debugger_url(url, &name))
+        .get(debugger_url(url, name))
         .header("content-type", "application/json")
         .send()?
         .text()?;
@@ -290,7 +295,7 @@ fn query_peer(client: &Client, url: &str, name: &str) -> anyhow::Result<NodeInfo
 }
 
 fn show_graph(graph: &[NodeInfo]) -> usize {
-    use petgraph::{prelude::DiGraph, algo, dot};
+    use petgraph::{algo, dot, prelude::DiGraph};
 
     let mut gr = DiGraph::new();
     let mut ips = BTreeMap::new();
@@ -328,7 +333,7 @@ fn show_graph(graph: &[NodeInfo]) -> usize {
 fn main() -> anyhow::Result<()> {
     env_logger::Builder::new()
         .format(|buf, record| {
-            use std::{time::SystemTime, io::Write};
+            use std::{io::Write, time::SystemTime};
             use time::OffsetDateTime;
 
             let (hour, minute, second, micro) = OffsetDateTime::from(SystemTime::now())

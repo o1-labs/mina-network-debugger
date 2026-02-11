@@ -1,5 +1,5 @@
-use pqcrypto_traits::sign::{SecretKey, PublicKey};
 use pqcrypto_dilithium::{dilithium2, dilithium3, dilithium5};
+use pqcrypto_traits::sign::{PublicKey, SecretKey};
 
 use crate::{Absorb, Emit, Limit, ParseError};
 

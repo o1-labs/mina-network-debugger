@@ -1,13 +1,13 @@
 use std::{
-    collections::BTreeMap,
-    io::{Cursor, self},
     borrow::Cow,
+    collections::BTreeMap,
+    io::{self, Cursor},
 };
 
 use mina_p2p_messages::{
     binprot::{BinProtRead, BinProtWrite},
+    rpc_kernel::{MessageHeader, QueryHeader, ResponseHeader},
     string::CharString as BString,
-    rpc_kernel::{QueryHeader, MessageHeader, ResponseHeader},
     utils,
 };
 use thiserror::Error;

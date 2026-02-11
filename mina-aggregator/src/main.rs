@@ -1,10 +1,10 @@
-mod routes;
 mod database;
 mod rocksdb;
+mod routes;
 
-use std::{thread, env};
+use std::{env, thread};
 
-use tokio::{sync::oneshot, runtime::Runtime};
+use tokio::{runtime::Runtime, sync::oneshot};
 
 use self::database::Database;
 
@@ -51,7 +51,9 @@ fn main() {
 
     let user_handler = move || {
         log::info!("ctrlc");
-        callback.take().map(|f| f());
+        if let Some(f) = callback.take() {
+            f();
+        }
     };
     if let Err(err) = ctrlc::set_handler(user_handler) {
         log::error!("failed to set ctrlc handler {err}");

@@ -1,7 +1,7 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use super::{DynSized, Collection};
+use super::{Collection, DynSized};
 
 mod limit;
 pub use self::limit::{Limit, LimitDescriptor, LimitError};

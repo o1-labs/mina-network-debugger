@@ -1,10 +1,10 @@
-use std::{env, net::IpAddr, fs::File, path::PathBuf, process};
+use std::{env, fs::File, net::IpAddr, path::PathBuf, process};
 
 use structopt::StructOpt;
 
 use simulator::{
-    registry::{tests, server},
     peer,
+    registry::{server, tests},
 };
 
 #[derive(StructOpt)]
@@ -59,7 +59,9 @@ fn main() -> anyhow::Result<()> {
             let build_number = env::var("BUILD_NUMBER")?.parse::<u32>()?;
             let this_ip = env::var("MY_POD_IP")?.parse::<IpAddr>()?;
 
-            if let Err(err) = peer::main_behavior::run(blocks, delay, &registry, build_number, this_ip) {
+            if let Err(err) =
+                peer::main_behavior::run(blocks, delay, &registry, build_number, this_ip)
+            {
                 log::error!("{err}");
             }
             Ok(())
@@ -123,7 +125,7 @@ fn main() -> anyhow::Result<()> {
                     if !ok {
                         log::error!("test failed");
                         let mut test_result = test_result;
-                        for (_, report) in &mut test_result {
+                        for report in test_result.values_mut() {
                             report.matches.clear();
                         }
                         serde_json::to_writer_pretty(std::io::stdout(), &test_result)?;

@@ -1,4 +1,4 @@
-use super::{HandleData, DirectedId, DynamicProtocol, Cx, Db, DbResult, mplex, yamux, StreamId};
+use super::{mplex, yamux, Cx, Db, DbResult, DirectedId, DynamicProtocol, HandleData, StreamId};
 
 pub enum State<Inner> {
     Mplex(mplex::State<Inner>),

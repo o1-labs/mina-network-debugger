@@ -1,13 +1,14 @@
-#![cfg(target_arch = "x86_64")]
+#![allow(clippy::zombie_processes)]
 
+#[cfg(target_arch = "x86_64")]
 fn main() {
+    use pete::{Ptracer, Restart, Stop};
     use std::{
+        io::Write,
         process::{Command, Stdio},
         thread,
         time::Duration,
-        io::Write,
     };
-    use pete::{Ptracer, Stop, Restart};
 
     let mut tracer = Ptracer::new();
     let mut cat = Command::new("cat");
@@ -37,4 +38,9 @@ fn main() {
         thread::sleep(Duration::from_secs(2));
         pipe.write_all(b"hello").unwrap();
     }
+}
+
+#[cfg(not(target_arch = "x86_64"))]
+fn main() {
+    eprintln!("ptrace-poc is only supported on x86_64");
 }

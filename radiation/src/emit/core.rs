@@ -31,6 +31,7 @@ where
     fn emit(&self, buffer: &mut W);
 }
 
+#[allow(dead_code)]
 pub struct CsBuffer<const SIZE: usize> {
     pos: usize,
     bytes: [u8; SIZE],
@@ -46,6 +47,7 @@ impl<const SIZE: usize> RadiationBuffer for CsBuffer<SIZE> {
     }
 }
 
+#[allow(dead_code)]
 trait SpecExtend<'a, I>
 where
     I: IntoIterator<Item = &'a u8>,

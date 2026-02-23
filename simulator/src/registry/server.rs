@@ -3,8 +3,8 @@ use warp::{hyper::StatusCode, reply, Filter, Rejection, Reply};
 pub const PORT: u16 = 80;
 
 pub fn run(nodes: u32) -> anyhow::Result<()> {
-    use tokio::{runtime::Builder, sync::oneshot};
     use signal_hook::{consts, iterator::Signals};
+    use tokio::{runtime::Builder, sync::oneshot};
 
     let rt = Builder::new_multi_thread()
         .enable_io()
@@ -20,12 +20,11 @@ pub fn run(nodes: u32) -> anyhow::Result<()> {
 
     let handler = rt.spawn(server);
 
-    let mut signals = Signals::new(&[consts::SIGINT, consts::SIGTERM])?;
-    for sig in signals.forever() {
+    let mut signals = Signals::new([consts::SIGINT, consts::SIGTERM])?;
+    if let Some(sig) = signals.forever().next() {
         log::info!("signal {sig}");
         tx.send(()).unwrap_or_default();
         rt.block_on(handler).unwrap();
-        break;
     }
 
     Ok(())
@@ -35,15 +34,15 @@ fn routes(
     nodes: u32,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone + Sync + Send + 'static {
     use std::{
-        sync::{Arc, Mutex},
-        net::SocketAddr,
         convert::Infallible,
+        net::SocketAddr,
+        sync::{Arc, Mutex},
     };
 
-    use warp::reply::{Json, WithStatus, with};
     use serde::Deserialize;
+    use warp::reply::{with, Json, WithStatus};
 
-    use super::state::{State, SplitContext};
+    use super::state::{SplitContext, State};
 
     #[derive(Deserialize)]
     struct Query {
@@ -192,37 +191,37 @@ fn routes(
             }
         });
 
-        let mock_split_report = warp::path!("mock_split_report")
-            .and(warp::filters::addr::remote())
-            .and(warp::body::json())
-            .and(warp::query())
-            .and(warp::post())
-            .map({
-                let state = state.clone();
-                move |addr: Option<SocketAddr>, report, Query { build_number }| {
-                    let Some(addr) = addr else {
-                        log::error!("could not determine registrant address");
-                        return reply::with_status(
-                            reply::json(&"could not determine registrant address"),
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                        );
-                    };
-                    log::info!("receive node split report from {addr}, build {build_number}");
-                    log::debug!("{report:?}");
+    let mock_split_report = warp::path!("mock_split_report")
+        .and(warp::filters::addr::remote())
+        .and(warp::body::json())
+        .and(warp::query())
+        .and(warp::post())
+        .map({
+            let state = state.clone();
+            move |addr: Option<SocketAddr>, report, Query { build_number }| {
+                let Some(addr) = addr else {
+                    log::error!("could not determine registrant address");
+                    return reply::with_status(
+                        reply::json(&"could not determine registrant address"),
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                    );
+                };
+                log::info!("receive node split report from {addr}, build {build_number}");
+                log::debug!("{report:?}");
 
-                    let mut lock = state.lock().expect("must not panic during mutex hold");
-                    if lock.build_number() != build_number {
-                        log::warn!(
-                            "ignore node split report {build_number}, current {}",
-                            lock.build_number()
-                        );
-                        return reply::with_status(reply::json(&""), StatusCode::GONE);
-                    }
-                    lock.add_mock_split_report(addr, report);
-
-                    reply::with_status(reply::json(&""), StatusCode::OK)
+                let mut lock = state.lock().expect("must not panic during mutex hold");
+                if lock.build_number() != build_number {
+                    log::warn!(
+                        "ignore node split report {build_number}, current {}",
+                        lock.build_number()
+                    );
+                    return reply::with_status(reply::json(&""), StatusCode::GONE);
                 }
-            });
+                lock.add_mock_split_report(addr, report);
+
+                reply::with_status(reply::json(&""), StatusCode::OK)
+            }
+        });
 
     let debugger_report = warp::path!("report" / "debugger")
         .and(warp::filters::addr::remote())
@@ -262,8 +261,13 @@ fn routes(
     });
 
     let get_paths = warp::get().and(register.or(summary).or(split));
-    let post_paths = warp::post()
-        .and(net_report.or(mock_report).or(mock_split_report).or(debugger_report).or(reset));
+    let post_paths = warp::post().and(
+        net_report
+            .or(mock_report)
+            .or(mock_split_report)
+            .or(debugger_report)
+            .or(reset),
+    );
     let json_content = with::header("Content-Type", "application/json");
 
     let cors_filter = warp::cors()

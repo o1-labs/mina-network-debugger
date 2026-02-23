@@ -1,14 +1,14 @@
 use std::{
-    time::{SystemTime, Duration},
     fmt,
-    str::FromStr,
     net::SocketAddr,
+    str::FromStr,
+    time::{Duration, SystemTime},
 };
 
 use libp2p_core::PeerId;
 use mina_p2p_messages::{bigint::BigInt, v2};
 use radiation::{Absorb, Emit};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::custom_coding;
 
@@ -127,7 +127,7 @@ impl Serialize for Hash {
     where
         S: serde::Serializer,
     {
-        hex::encode(&self.0).serialize(serializer)
+        hex::encode(self.0).serialize(serializer)
     }
 }
 
@@ -157,7 +157,7 @@ impl<'de> Deserialize<'de> for Hash {
 
 impl fmt::Debug for Hash {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", hex::encode(&self.0))
+        write!(f, "{}", hex::encode(self.0))
     }
 }
 

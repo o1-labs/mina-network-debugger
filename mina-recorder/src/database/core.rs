@@ -1,40 +1,40 @@
 use std::{
-    path::{PathBuf, Path},
-    time::{Duration, SystemTime},
     cmp::Ordering,
-    sync::{Arc, Mutex},
-    collections::{BTreeMap, HashSet, BTreeSet},
-    io,
+    collections::{BTreeMap, BTreeSet, HashSet},
     convert::TryInto,
+    io,
     net::SocketAddr,
+    path::{Path, PathBuf},
+    sync::{Arc, Mutex},
+    time::{Duration, SystemTime},
 };
 
 use mina_p2p_messages::gossip::GossipNetMessageV2;
-use radiation::{AbsorbExt, nom, ParseError, Emit};
+use radiation::{nom, AbsorbExt, Emit, ParseError};
 
 use serde::Serialize;
 use thiserror::Error;
 
 use super::{
-    types::{
-        Connection, ConnectionId, StreamFullId, Message, StreamKind, FullMessage, MessageId,
-        Timestamp, StatsDbKey, StatsV2DbKey, CapnpEventWithMetadata, CapnpEventWithMetadataKey,
-        CapnpTableRow, CapnpEventDecoded,
-    },
-    params::{ValidParams, Coordinate, StreamFilter, Direction, KindFilter, ValidParamsConnection},
     index::{
-        ConnectionIdx, StreamIdx, StreamByKindIdx, MessageKindIdx, AddressIdx, LedgerHash,
-        LedgerHashIdx,
+        AddressIdx, ConnectionIdx, LedgerHash, LedgerHashIdx, MessageKindIdx, StreamByKindIdx,
+        StreamIdx,
     },
+    params::{Coordinate, Direction, KindFilter, StreamFilter, ValidParams, ValidParamsConnection},
     sorted_intersect::sorted_intersect,
+    types::{
+        CapnpEventDecoded, CapnpEventWithMetadata, CapnpEventWithMetadataKey, CapnpTableRow,
+        Connection, ConnectionId, FullMessage, Message, MessageId, StatsDbKey, StatsV2DbKey,
+        StreamFullId, StreamKind, Timestamp,
+    },
 };
 
 use crate::{
     decode::{
+        meshsub_stats::{self, BlockStat, Hash, TxStat},
         DecodeError, MessageType,
-        meshsub_stats::{self, BlockStat, TxStat, Hash},
     },
-    meshsub::{SnarkByHash, Event, SnarkWithHash},
+    meshsub::{Event, SnarkByHash, SnarkWithHash},
     ChunkHeader,
 };
 
@@ -894,7 +894,7 @@ impl DbCore {
         id: u64,
         timestamp: u64,
     ) -> Result<impl Iterator<Item = (u64, StraceLine)> + '_, DbError> {
-        use rocksdb::{IteratorMode, Direction};
+        use rocksdb::{Direction, IteratorMode};
 
         let id = if timestamp == 0 {
             id
@@ -941,9 +941,14 @@ impl DbCore {
             .take_while(|(key, _)| key.height == id)
             .fold(None, |mut acc, (k, mut v)| {
                 let (_, current) = acc.get_or_insert_with(|| {
-                    let mut v = BlockStat::default();
-                    v.height = k.height;
-                    (k, v)
+                    let height = k.height;
+                    (
+                        k,
+                        BlockStat {
+                            height,
+                            ..Default::default()
+                        },
+                    )
                 });
                 current.events.append(&mut v.events);
                 acc
@@ -1019,10 +1024,8 @@ impl DbCore {
                                     }
                                     _ => false,
                                 };
-                                if conform {
-                                    if deduplicate.insert(hash) {
-                                        v.push((snark, id.message_id.0));
-                                    }
+                                if conform && deduplicate.insert(hash) {
+                                    v.push((snark, id.message_id.0));
                                 }
                             }
                             GossipNetMessageV2::NewState(block) => {
@@ -1045,10 +1048,8 @@ impl DbCore {
                                         }
                                         _ => false,
                                     };
-                                    if conform {
-                                        if deduplicate.insert(hash) {
-                                            v.push((snark, id.message_id.0));
-                                        }
+                                    if conform && deduplicate.insert(hash) {
+                                        v.push((snark, id.message_id.0));
                                     }
                                 }
                             }
@@ -1122,7 +1123,9 @@ impl DbCore {
             return Ok(None);
         };
 
-        <[u8; 32]>::try_from(v).map(Some).map_err(|_| DbError::WrongSkSize)
+        <[u8; 32]>::try_from(v)
+            .map(Some)
+            .map_err(|_| DbError::WrongSkSize)
     }
 
     pub fn put_sk(&self, pk: [u8; 32], sk: [u8; 32]) -> Result<(), DbError> {

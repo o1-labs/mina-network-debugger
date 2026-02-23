@@ -1,15 +1,15 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use core::fmt;
 use alloc::{
-    string::{String, ToString},
     boxed::Box,
+    string::{String, ToString},
     vec::Vec,
 };
+use core::fmt;
 
 use nom::{
-    error::{ParseError as NomParseError, ErrorKind as NomErrorKind, FromExternalError},
+    error::{ErrorKind as NomErrorKind, FromExternalError, ParseError as NomParseError},
     Err,
 };
 

@@ -5,7 +5,7 @@ use std::{
 
 use crate::database::StreamKind;
 
-use super::{HandleData, DirectedId, DynamicProtocol, Cx, Db, DbResult, StreamId};
+use super::{Cx, Db, DbResult, DirectedId, DynamicProtocol, HandleData, StreamId};
 
 pub struct State<Inner> {
     incoming: acc::State<true>,
@@ -45,7 +45,7 @@ impl<Inner> DynamicProtocol for State<Inner> {
 }
 
 mod header {
-    use serde::{Serialize, Deserialize};
+    use serde::{Deserialize, Serialize};
     use thiserror::Error;
 
     #[derive(Debug, Error)]
@@ -215,11 +215,11 @@ mod header {
         Internal,
     }
 }
-pub use self::header::{HeaderParseError, Header, HeaderType, HeaderFlags, YamuxError};
+pub use self::header::{Header, HeaderFlags, HeaderParseError, HeaderType, YamuxError};
 
 // TODO: reuse `mplex::acc`
 mod acc {
-    use std::{borrow::Cow, task::Poll, cmp::Ordering, mem};
+    use std::{borrow::Cow, cmp::Ordering, mem, task::Poll};
 
     use thiserror::Error;
 
@@ -435,7 +435,7 @@ where
 mod tests {
     use crate::database::StreamId;
 
-    use super::{State, DynamicProtocol};
+    use super::{DynamicProtocol, State};
 
     #[test]
     fn trivial_acc() {

@@ -9,6 +9,7 @@ use super::{
 
 // node -> libp2p
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum Msg {
     Unknown(u16),
     RpcRequest(RpcRequest),
@@ -26,6 +27,7 @@ impl Msg {
 }
 
 #[derive(Debug)]
+#[allow(clippy::large_enum_variant)]
 pub enum RpcRequest {
     Unknown(u16),
     Configure(Config),

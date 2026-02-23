@@ -1,6 +1,6 @@
-use std::{time::SystemTime, collections::BTreeMap};
+use std::{collections::BTreeMap, time::SystemTime};
 
-use mina_recorder::database::{FullMessage, ConnectionId};
+use mina_recorder::database::{ConnectionId, FullMessage};
 
 use reqwest::blocking::Client;
 
@@ -47,6 +47,7 @@ fn main() {
     let mut counters = BTreeMap::<u32, u32>::new();
     let mut max = Default::default();
     for (_, diff) in &diffs {
+        #[allow(clippy::incompatible_msrv)]
         let key = diff.as_nanos().ilog2();
         *counters.entry(key).or_default() += 1;
         if max < *diff {
@@ -57,7 +58,7 @@ fn main() {
     let mut a = 0;
     for (key, counter) in counters {
         a += counter;
-        println!("{a} are smaller {}", 1 << key + 1);
+        println!("{a} are smaller {}", 1 << (key + 1));
     }
 
     println!("total messages: {id}, max difference: {max:?}");

@@ -1,7 +1,9 @@
 use capnp::message::Builder;
 
-use crate::libp2p_ipc_capnp::{gating_config, libp2p_config, topic_level};
-use crate::message::CapnpEncode;
+use crate::{
+    libp2p_ipc_capnp::{gating_config, libp2p_config, topic_level},
+    message::CapnpEncode,
+};
 
 #[derive(Debug)]
 pub struct Config {
@@ -114,8 +116,8 @@ impl<'a> CapnpEncode<'a> for Config {
             let mut r = Builder::new_default();
             let mut root = r.init_root::<topic_level::Builder>();
             let mut topics = root.reborrow().init_topics(value.len() as _);
-            for (index, value) in value.into_iter().enumerate() {
-                topics.set(index as _, &value);
+            for (index, value) in value.iter().enumerate() {
+                topics.set(index as _, value);
             }
             t.set_with_caveats(index as _, root.into_reader())?;
         }

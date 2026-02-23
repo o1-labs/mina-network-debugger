@@ -3,7 +3,7 @@
 
 use alloc::{boxed::Box, vec::Vec};
 
-use super::{AbsorbExt, Absorb, ParseError, ParseErrorKind, Emit, DynSized, Limit};
+use super::{Absorb, AbsorbExt, DynSized, Emit, Limit, ParseError, ParseErrorKind};
 
 #[derive(Debug, PartialEq, Eq, Absorb, Emit)]
 struct SomeStruct {
@@ -44,7 +44,7 @@ enum SomeEnum {
 }
 
 // custom parser, parse u8 and square the result
-fn absorb<'pa>(input: &'pa [u8]) -> nom::IResult<&'pa [u8], u16, ParseError<&'pa [u8]>> {
+fn absorb(input: &[u8]) -> nom::IResult<&[u8], u16, ParseError<&[u8]>> {
     crate::nom::combinator::map(u8::absorb::<()>, |a| a as u16 * a as u16)(input)
 }
 

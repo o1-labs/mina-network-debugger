@@ -1,11 +1,11 @@
 use std::{
-    time::{SystemTime, Duration},
     collections::{BTreeMap, BTreeSet},
     net::SocketAddr,
+    time::{Duration, SystemTime},
 };
 
-use reqwest::blocking::{ClientBuilder, Client};
-use serde::{Serialize, Deserialize};
+use reqwest::blocking::{Client, ClientBuilder};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TestReport {
@@ -148,7 +148,7 @@ fn get_messages(client: &Client, params: &str) -> anyhow::Result<Vec<(u64, FullM
     };
 
     let res = client
-        .get(&format!("http://localhost:8000/messages?{params}"))
+        .get(format!("http://localhost:8000/messages?{params}"))
         .send()?
         .text()?;
     if let Ok(msgs) = serde_json::from_str::<Vec<(u64, FullMessage)>>(&res) {
@@ -164,7 +164,7 @@ fn get_messages(client: &Client, params: &str) -> anyhow::Result<Vec<(u64, FullM
 
 fn get_message(client: &Client, id: u64) -> anyhow::Result<Vec<u8>> {
     client
-        .get(&format!("http://localhost:8000/message_bin/{id}"))
+        .get(format!("http://localhost:8000/message_bin/{id}"))
         .send()?
         .bytes()
         .map(|x| x.to_vec())
@@ -199,7 +199,7 @@ pub fn test_messages_timestamps(client: &Client, started: SystemTime) -> DbTestT
         let start = (s + i as f64 * duration / (GROUPS as f64)) as u64;
         let end = (s + (i + 1) as f64 * duration / (GROUPS as f64)) as u64;
         let messages =
-            match get_messages(&client, &format!("timestamp={start}&limit_timestamp={end}")) {
+            match get_messages(client, &format!("timestamp={start}&limit_timestamp={end}")) {
                 Ok(v) => v,
                 Err(err) => {
                     log::error!("{err}");
@@ -244,7 +244,7 @@ pub fn test_order(client: &Client) -> DbTestOrderReport {
     let mut id = 0;
     loop {
         let params = format!("stream_kind=/mina/node-status&limit=500&id={id}");
-        let mut v = match get_messages(&client, &params) {
+        let mut v = match get_messages(client, &params) {
             Ok(v) => v,
             Err(err) => {
                 log::error!("{err}");
@@ -266,7 +266,7 @@ pub fn test_order(client: &Client) -> DbTestOrderReport {
     for (id, msg) in messages {
         // assert!(msg.size % 0x400 == 0);
         // assert_eq!(msg.stream_kind, "/mina/node-status");
-        let bytes = get_message(&client, id).unwrap();
+        let bytes = get_message(client, id).unwrap();
         for this_n in bytes
             .chunks(0x400)
             .map(|c| u32::from_ne_bytes(c[..4].try_into().unwrap()))
@@ -312,7 +312,7 @@ pub fn test_events(events: Vec<DbEventWithMetadata>, peer_id: String) -> DbTestE
     }
 
     fn get_events() -> Vec<DbEventWithMetadata> {
-        let res = reqwest::blocking::get(&format!("http://localhost:8000/libp2p_ipc/block/all"))
+        let res = reqwest::blocking::get("http://localhost:8000/libp2p_ipc/block/all")
             .unwrap()
             .text()
             .unwrap();
@@ -320,7 +320,7 @@ pub fn test_events(events: Vec<DbEventWithMetadata>, peer_id: String) -> DbTestE
     }
 
     fn get_network_event(height: u32) -> Vec<BlockNetworkEvent> {
-        let res = reqwest::blocking::get(&format!("http://localhost:8000/block/{height}"))
+        let res = reqwest::blocking::get(format!("http://localhost:8000/block/{height}"))
             .unwrap()
             .text()
             .unwrap();

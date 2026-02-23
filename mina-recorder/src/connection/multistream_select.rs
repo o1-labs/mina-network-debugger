@@ -1,6 +1,6 @@
 use crate::database::StreamKind;
 
-use super::{HandleData, DirectedId, DynamicProtocol, Cx, Db, DbResult, StreamId};
+use super::{Cx, Db, DbResult, DirectedId, DynamicProtocol, HandleData, StreamId};
 
 pub struct State<Inner> {
     stream_id: StreamId,
@@ -36,7 +36,7 @@ mod hl {
     }
 
     impl State {
-        pub fn poll<'a, 'b>(&'a mut self, incoming: bool, bytes: &'b [u8]) -> Output<'b> {
+        pub fn poll<'b>(&mut self, incoming: bool, bytes: &'b [u8]) -> Output<'b> {
             let (this, other) = if incoming {
                 (&mut self.incoming, &mut self.outgoing)
             } else {
@@ -229,20 +229,20 @@ where
 fn simple_test() {
     let mut state = State::<()>::from(StreamId::Handshake);
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
     let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a036e610a072f6e6f6973650a").expect("valid constant");
     let chunks = [1, 19, 1, 3, 1, 7];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(true, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(true, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
 
-    let mut data = hex::decode("00205d406d48fe6549c8bd67afd93c87295beae0c11efac62742b5ef28c567b5d36b").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("00205d406d48fe6549c8bd67afd93c87295beae0c11efac62742b5ef28c567b5d36b").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_some());
 }
 
@@ -252,19 +252,19 @@ fn simple_test() {
 fn simple_glue_payload_test() {
     let mut state = State::<()>::from(StreamId::Handshake);
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
     let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a036e610a072f6e6f6973650a").expect("valid constant");
     // payload is glued to the message
     data.extend_from_slice(b"payload");
-    let result = state.hl.poll(true, &mut data);
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
 
     // additional payload
-    let mut data = *b"_additional";
-    let result = state.hl.poll(true, &mut data);
+    let data = *b"_additional";
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(&result).agreed.is_some());
     let payload = String::from_utf8(result.agreed.unwrap().1.to_vec()).unwrap();
     assert_eq!(dbg!(payload), "payload_additional");
@@ -276,24 +276,24 @@ fn simple_glue_payload_test() {
 fn simple_early_payload_test() {
     let mut state = State::<()>::from(StreamId::Handshake);
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a10636f64612f727063732f302e302e310a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a10636f64612f727063732f302e302e310a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("070000000000000002fd5250430001").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("070000000000000002fd5250430001").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_some());
 
-    let mut data = hex::decode("10636f64612f727063732f302e302e310a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("10636f64612f727063732f302e302e310a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("070000000000000002fd5250430001").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("070000000000000002fd5250430001").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_some());
 }
 
@@ -303,28 +303,28 @@ fn simple_early_payload_test() {
 fn simultaneous_connect_test() {
     let mut state = State::<()>::from(StreamId::Handshake);
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a1c73656c6563743a31383333363733363237323438313935323033380a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a1c73656c6563743a31383333363733363237323438313935323033380a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("1c73656c6563743a31343838333538303531393436383433383239370a0a726573706f6e6465720a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("1c73656c6563743a31343838333538303531393436383433383239370a0a726573706f6e6465720a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("0a696e69746961746f720a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("0a696e69746961746f720a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
-    let mut data = hex::decode("0020c29c4aa9bc861ac3163bfc562ab3f1ca984440f50ca7944ab1fcb40b398bac34").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("0020c29c4aa9bc861ac3163bfc562ab3f1ca984440f50ca7944ab1fcb40b398bac34").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_some());
 }
 
@@ -334,8 +334,8 @@ fn simultaneous_connect_test() {
 fn simultaneous_connect_with_accumulator_test() {
     let mut state = State::<()>::from(StreamId::Handshake);
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
     println!();
@@ -343,8 +343,8 @@ fn simultaneous_connect_with_accumulator_test() {
     let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a1c73656c6563743a31383333363733363237323438313935323033380a").expect("valid constant");
     let chunks = [1, 19, 1, 29, 1, 7, 1, 28];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(true, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(true, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
 
@@ -353,8 +353,8 @@ fn simultaneous_connect_with_accumulator_test() {
     let mut data = hex::decode("1c73656c6563743a31343838333538303531393436383433383239370a0a726573706f6e6465720a").expect("valid constant");
     let chunks = [29, 11];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(false, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(false, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
 
@@ -363,21 +363,21 @@ fn simultaneous_connect_with_accumulator_test() {
     let mut data = hex::decode("0a696e69746961746f720a072f6e6f6973650a").expect("valid constant");
     let chunks = [1, 10, 1, 7];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(true, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(true, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
 
     println!();
 
-    let mut data = hex::decode("072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
 
     println!();
 
-    let mut data = hex::decode("0020c29c4aa9bc861ac3163bfc562ab3f1ca984440f50ca7944ab1fcb40b398bac34").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("0020c29c4aa9bc861ac3163bfc562ab3f1ca984440f50ca7944ab1fcb40b398bac34").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_some());
 }
 
@@ -418,61 +418,61 @@ fn simultaneous_connect_misordered_noise_test() {
     let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a").expect("valid constant");
     let chunks = [1, 19, 1, 29];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(false, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(false, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
     println!();
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
     println!();
 
-    let mut data = hex::decode("07").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("07").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_none());
     println!();
 
-    let mut data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("132f6d756c746973747265616d2f312e302e300a1d2f6c69627032702f73696d756c74616e656f75732d636f6e6e6563740a072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
     println!();
 
     let mut data = hex::decode("2f6e6f6973650a1c73656c6563743a31343938323336373438313134313138383431310a").expect("valid constant");
     let chunks = [7, 1, 28];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(false, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(false, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
     println!();
 
-    let mut data = hex::decode("0a726573706f6e6465720a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("0a726573706f6e6465720a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
     println!();
 
     let mut data = hex::decode("0a696e69746961746f720a072f6e6f6973650a").expect("valid constant");
     let chunks = [1, 10, 1, 7];
     for chunk in chunks {
-        let mut chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
-        let result = state.hl.poll(false, &mut chunk_data);
+        let chunk_data = data.drain(..chunk).collect::<Vec<u8>>();
+        let result = state.hl.poll(false, &chunk_data);
         assert!(dbg!(result).agreed.is_none());
     }
     println!();
 
-    let mut data = hex::decode("072f6e6f6973650a").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("072f6e6f6973650a").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_none());
     println!();
 
-    let mut data = hex::decode("002052096fcedd899f60aa1b2893bcfb86b42b8c33c72b39320904d31220a1474e41").expect("valid constant");
-    let result = state.hl.poll(false, &mut data);
+    let data = hex::decode("002052096fcedd899f60aa1b2893bcfb86b42b8c33c72b39320904d31220a1474e41").expect("valid constant");
+    let result = state.hl.poll(false, &data);
     assert!(dbg!(result).agreed.is_some());
     println!();
 
-    let mut data = hex::decode("00c8d11e149aa99fd7174cca7738f0bd4ccf0e3b526061b1f7b36e7850bc9cdec4310081d0e07edacefc409660af40a31e043ec59ba1fe009b4c6ca0219b7882ccb55656a4f8e44764f62f627c57aa974e05817e7e1e48983c0ceafecf555cac9ed43f15755d820ec02255855fdabfbac20e572abe457f783ae66914c283794c4df1f4a6f037e38c2044f53fcda4ea414b3f088be82d16910dfa49049f0f257457f7137bb203aed25c2a4f2564675e64f96b9b27305b4ace8ddebf48dc3d0158590e96ebc866034e88fb").expect("valid constant");
-    let result = state.hl.poll(true, &mut data);
+    let data = hex::decode("00c8d11e149aa99fd7174cca7738f0bd4ccf0e3b526061b1f7b36e7850bc9cdec4310081d0e07edacefc409660af40a31e043ec59ba1fe009b4c6ca0219b7882ccb55656a4f8e44764f62f627c57aa974e05817e7e1e48983c0ceafecf555cac9ed43f15755d820ec02255855fdabfbac20e572abe457f783ae66914c283794c4df1f4a6f037e38c2044f53fcda4ea414b3f088be82d16910dfa49049f0f257457f7137bb203aed25c2a4f2564675e64f96b9b27305b4ace8ddebf48dc3d0158590e96ebc866034e88fb").expect("valid constant");
+    let result = state.hl.poll(true, &data);
     assert!(dbg!(result).agreed.is_some());
 }

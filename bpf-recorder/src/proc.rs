@@ -1,8 +1,8 @@
 use core::time::Duration;
 use std::{
-    time::SystemTime,
-    io::{self, BufRead, Read},
     fs::File,
+    io::{self, BufRead, Read},
+    time::SystemTime,
 };
 
 /// Check whether the first command line argument matches the pattern
@@ -34,16 +34,11 @@ impl S {
         for line in io::BufReader::new(File::open("/proc/stat")?).lines() {
             let line = line?;
             let mut it = line.split(' ');
-            match it.next() {
-                Some("btime") => {
-                    s.b_time = it
-                        .next()
-                        .and_then(|s| s.parse::<u64>().ok())
-                        .and_then(|secs| {
-                            SystemTime::UNIX_EPOCH.checked_add(Duration::from_secs(secs))
-                        });
-                }
-                _ => (),
+            if let Some("btime") = it.next() {
+                s.b_time = it
+                    .next()
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .and_then(|secs| SystemTime::UNIX_EPOCH.checked_add(Duration::from_secs(secs)));
             }
         }
 

@@ -1,6 +1,6 @@
 use core::{
+    ffi::{c_int, c_void},
     marker::PhantomData,
-    ffi::{c_void, c_int},
 };
 
 pub struct ProgRef {

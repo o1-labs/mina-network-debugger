@@ -4,7 +4,7 @@ use prost::{bytes::Bytes, Message};
 
 use crate::database::StreamKind;
 
-use super::{DecodeError, utils};
+use super::{utils, DecodeError};
 
 #[allow(clippy::derive_partial_eq_without_eq)]
 mod pb {

@@ -5,6 +5,7 @@ use mina_p2p_messages::{
     gossip::GossipNetMessageV2,
 };
 
+#[allow(clippy::large_enum_variant)]
 pub enum ConsensusMessage {
     Inner(GossipNetMessageV2),
     Test(String),
@@ -14,7 +15,7 @@ impl ConsensusMessage {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, binprot::Error> {
         let mut bytes_cut = &bytes[8..];
         if bytes_cut[0] == 3 {
-            let msg = String::from_utf8(bytes_cut[1..].to_vec()).unwrap_or(String::new());
+            let msg = String::from_utf8(bytes_cut[1..].to_vec()).unwrap_or_default();
             Ok(ConsensusMessage::Test(msg))
         } else {
             GossipNetMessageV2::binprot_read(&mut bytes_cut).map(ConsensusMessage::Inner)
@@ -27,7 +28,7 @@ impl ConsensusMessage {
         let key;
         // key for blake2 mac must be 64 bytes long or smaller
         // this expression will construct valid key
-        let key = if topic.as_bytes().len() <= 64 {
+        let key = if topic.len() <= 64 {
             topic.as_bytes()
         } else {
             key = blake2::Blake2b::<typenum::U32>::default()
@@ -86,7 +87,7 @@ impl fmt::Display for ConsensusMessage {
                     .consensus_state
                     .blockchain_length
                     .0
-                     .0 as u32;
+                     .0;
 
                 write!(f, "new state: {height}")
             }

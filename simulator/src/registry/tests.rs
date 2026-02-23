@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, net::IpAddr};
 
-use super::messages::{Summary, MockReport, NetReport};
+use super::messages::{MockReport, NetReport, Summary};
 
 pub fn test_ipc(summary: &BTreeMap<IpAddr, Summary>) -> anyhow::Result<()> {
     println!("This test verifies that each node's interprocess communication checksum matches the checksum recorded by the debugger.");
@@ -189,9 +189,9 @@ fn test_local(
 }
 
 mod types {
-    use std::{time::SystemTime, net::SocketAddr};
+    use std::{net::SocketAddr, time::SystemTime};
 
-    use serde::{Serialize, Deserialize};
+    use serde::{Deserialize, Serialize};
 
     use mina_ipc::message::ChecksumPair;
 
@@ -341,10 +341,8 @@ pub fn test_network_checksum(
         .collect()
 }
 
-pub fn test_split(
-    summary: &BTreeMap<IpAddr, Summary>,
-) -> anyhow::Result<()> {
-    use petgraph::{prelude::DiGraph, algo, dot};
+pub fn test_split(summary: &BTreeMap<IpAddr, Summary>) -> anyhow::Result<()> {
+    use petgraph::{algo, dot, prelude::DiGraph};
 
     let mut fail = false;
 
@@ -363,23 +361,35 @@ pub fn test_split(
             continue;
         };
 
-        let before_a = *before_ips.entry(*ip_a).or_insert_with(|| before.add_node(*ip_a));
-        let after_split_a = *after_split_ips.entry(*ip_a).or_insert_with(|| after_split.add_node(*ip_a));
-        let after_reunite_a = *after_reunite_ips.entry(*ip_a).or_insert_with(|| after_reunite.add_node(*ip_a));
+        let before_a = *before_ips
+            .entry(*ip_a)
+            .or_insert_with(|| before.add_node(*ip_a));
+        let after_split_a = *after_split_ips
+            .entry(*ip_a)
+            .or_insert_with(|| after_split.add_node(*ip_a));
+        let after_reunite_a = *after_reunite_ips
+            .entry(*ip_a)
+            .or_insert_with(|| after_reunite.add_node(*ip_a));
 
         for peer in &r.before.0 {
             let ip_b = peer.host.parse::<IpAddr>().unwrap();
-            let b = *before_ips.entry(ip_b).or_insert_with(|| before.add_node(ip_b));
+            let b = *before_ips
+                .entry(ip_b)
+                .or_insert_with(|| before.add_node(ip_b));
             before.add_edge(before_a, b, ());
         }
         for peer in &r.after_split.0 {
             let ip_b = peer.host.parse::<IpAddr>().unwrap();
-            let b = *after_split_ips.entry(ip_b).or_insert_with(|| after_split.add_node(ip_b));
+            let b = *after_split_ips
+                .entry(ip_b)
+                .or_insert_with(|| after_split.add_node(ip_b));
             after_split.add_edge(after_split_a, b, ());
         }
         for peer in &r.after_reunite.0 {
             let ip_b = peer.host.parse::<IpAddr>().unwrap();
-            let b = *after_reunite_ips.entry(ip_b).or_insert_with(|| after_reunite.add_node(ip_b));
+            let b = *after_reunite_ips
+                .entry(ip_b)
+                .or_insert_with(|| after_reunite.add_node(ip_b));
             after_reunite.add_edge(after_reunite_a, b, ());
         }
     }

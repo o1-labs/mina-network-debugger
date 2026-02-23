@@ -1,10 +1,10 @@
-use std::{time::Duration, sync::mpsc, process::Child};
+use std::{process::Child, sync::mpsc, time::Duration};
 
 use radiation::{Absorb, Emit};
 use serde::Serialize;
 use strace_parse::{raw, structure};
 
-use crate::{database::DbStrace, custom_coding};
+use crate::{custom_coding, database::DbStrace};
 
 #[derive(Absorb, Emit, Serialize)]
 pub struct StraceLine {
@@ -18,7 +18,9 @@ pub struct StraceLine {
 }
 
 pub fn process(mut source: Child, db: DbStrace, rx: mpsc::Receiver<()>) {
-    let read = source.stderr.as_mut()
+    let read = source
+        .stderr
+        .as_mut()
         .expect("must run this function only once, process must has stderr");
     let it = structure::iter_finished(raw::parse(read));
     for x in it {

@@ -1,12 +1,12 @@
 use std::{
-    net::{IpAddr, SocketAddr},
     collections::BTreeMap,
+    net::{IpAddr, SocketAddr},
     time::SystemTime,
 };
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use mina_ipc::message::{ChecksumPair, outgoing::Peer};
+use mina_ipc::message::{outgoing::Peer, ChecksumPair};
 
 use super::super::peer::tests::TestReport;
 

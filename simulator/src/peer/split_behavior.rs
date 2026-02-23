@@ -1,9 +1,18 @@
-use std::{fs, thread, time::SystemTime, sync::mpsc, path::Path};
+use std::{fs, path::Path, sync::mpsc, thread, time::SystemTime};
 
 use mina_ipc::message::{outgoing::PushMessage, Config};
-use reqwest::{blocking::{ClientBuilder, Client}, Url};
+use reqwest::{
+    blocking::{Client, ClientBuilder},
+    Url,
+};
 
-use crate::{libp2p_helper::Process, registry::{server, messages::{Registered, MockSplitReport}}};
+use crate::{
+    libp2p_helper::Process,
+    registry::{
+        messages::{MockSplitReport, Registered},
+        server,
+    },
+};
 
 pub const PEER_PORT: u16 = 8302;
 
@@ -35,17 +44,12 @@ pub mod time {
     pub const REUNITE: Duration = Duration::from_secs(90);
 }
 
-pub fn run(
-    registry: &str,
-    build_number: u32,
-) -> anyhow::Result<()> {
+pub fn run(registry: &str, build_number: u32) -> anyhow::Result<()> {
     // spawn libp2p_helper, this will trigger bpf debugger
     let (mut process, rx) = Process::spawn();
 
     // try create an http client, stop the libp2p_helper and thus the bpf debugger if failed
-    let client = ClientBuilder::new()
-        .timeout(time::MOCK_TIMEOUT)
-        .build();
+    let client = ClientBuilder::new().timeout(time::MOCK_TIMEOUT).build();
     let client = match client {
         Ok(v) => v,
         Err(err) => {
@@ -59,13 +63,7 @@ pub fn run(
         .parse::<Url>()
         .expect("hostname must be valid");
 
-    let result = run_inner(
-        &registry,
-        &client,
-        build_number,
-        &mut process,
-        rx,
-    );
+    let result = run_inner(&registry, &client, build_number, &mut process, rx);
 
     // ensure everything is stopped regardless `run_inner` succeeded or not
     let (_ipc, _status_code) = process.stop().expect("can check debuggers output");
@@ -80,7 +78,13 @@ pub fn run(
     Ok(())
 }
 
-fn run_inner(registry: &Url, client: &Client, build_number: u32, process: &mut Process, rx: mpsc::Receiver<PushMessage>) -> anyhow::Result<MockSplitReport> {
+fn run_inner(
+    registry: &Url,
+    client: &Client,
+    build_number: u32,
+    process: &mut Process,
+    rx: mpsc::Receiver<PushMessage>,
+) -> anyhow::Result<MockSplitReport> {
     // register on the registry
     let url = registry.join(&format!("register?build_number={build_number}"))?;
     let response = serde_json::from_reader::<_, Registered>(client.get(url).send()?)?;
@@ -119,10 +123,7 @@ fn run_inner(registry: &Url, client: &Client, build_number: u32, process: &mut P
 
     thread::sleep(time::INITIALIZATION);
 
-    let before = (
-        process.list_peers()?.unwrap_or_default(),
-        SystemTime::now(),
-    );
+    let before = (process.list_peers()?.unwrap_or_default(), SystemTime::now());
 
     let url = registry.join("split")?;
     client.get(url).send()?.status();
@@ -130,18 +131,12 @@ fn run_inner(registry: &Url, client: &Client, build_number: u32, process: &mut P
     // wait the libp2p notice the split
     thread::sleep(time::SPLIT);
 
-    let after_split = (
-        process.list_peers()?.unwrap_or_default(),
-        SystemTime::now(),
-    );
+    let after_split = (process.list_peers()?.unwrap_or_default(), SystemTime::now());
 
     // wait the libp2p notice the connectivity is restored and reconnect
     thread::sleep(time::REUNITE);
 
-    let after_reunite = (
-        process.list_peers()?.unwrap_or_default(),
-        SystemTime::now(),
-    );
+    let after_reunite = (process.list_peers()?.unwrap_or_default(), SystemTime::now());
 
     process.stop_receiving();
     receiver.join().unwrap();

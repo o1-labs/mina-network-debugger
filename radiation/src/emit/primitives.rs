@@ -1,8 +1,8 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use core::marker::PhantomData;
 use alloc::boxed::Box;
+use core::marker::PhantomData;
 
 use super::core::Emit;
 

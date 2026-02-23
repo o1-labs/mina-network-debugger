@@ -1,12 +1,14 @@
-use salsa20::cipher::generic_array::{typenum, GenericArray};
 use salsa20::{
-    cipher::{KeyIvInit as _, StreamCipher},
+    cipher::{
+        generic_array::{typenum, GenericArray},
+        KeyIvInit as _, StreamCipher,
+    },
     XSalsa20,
 };
 
 use crate::chunk::EncryptionStatus;
 
-use super::{HandleData, DirectedId, Cx, Db, DbResult, StreamId};
+use super::{Cx, Db, DbResult, DirectedId, HandleData, StreamId};
 
 pub struct State<Inner> {
     shared_secret: GenericArray<u8, typenum::U32>,

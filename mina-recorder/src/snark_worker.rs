@@ -1,15 +1,9 @@
 #[derive(Default)]
-pub struct SnarkWorkerState {
-
-}
+pub struct SnarkWorkerState {}
 
 impl SnarkWorkerState {
     pub fn handle_data(&mut self, incoming: bool, fd: u32, data: Vec<u8>) {
-        let arrow = if incoming {
-            "<-"
-        } else {
-            "->"
-        };
+        let arrow = if incoming { "<-" } else { "->" };
         let _ = (fd, arrow, data);
         // log::info!("snark worker {fd} {arrow} {}", hex::encode(data));
     }

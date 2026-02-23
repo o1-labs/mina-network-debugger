@@ -1,13 +1,13 @@
 use std::{
-    io::{Write, self},
-    thread,
     collections::{BTreeMap, BTreeSet},
+    io::{self, Write},
     mem,
     process::{Command, Stdio},
     sync::mpsc,
+    thread,
 };
 
-use pete::{Error, Ptracer, Pid, Stop, Restart, Signal};
+use pete::{Error, Pid, Ptracer, Restart, Signal, Stop};
 
 pub struct Task {
     running_state: bool,

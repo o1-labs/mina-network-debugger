@@ -1,5 +1,5 @@
 use capnp::message::{Reader, ReaderSegments};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::libp2p_ipc_capnp::{
     daemon_interface::{message, push_message},
@@ -97,10 +97,7 @@ pub enum PushMessage {
 
 impl PushMessage {
     pub fn relevant(&self) -> bool {
-        match self {
-            Self::Unknown(_) | Self::Irrelevant => false,
-            _ => true,
-        }
+        !matches!(self, Self::Unknown(_) | Self::Irrelevant)
     }
 }
 

@@ -1,10 +1,10 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use core::marker::PhantomData;
 use alloc::boxed::Box;
+use core::marker::PhantomData;
 
-use nom::{IResult, combinator, number, branch, bytes::complete, sequence};
+use nom::{branch, bytes::complete, combinator, number, sequence, IResult};
 
 use super::{core::Absorb, error::ParseError, limit::Limit};
 

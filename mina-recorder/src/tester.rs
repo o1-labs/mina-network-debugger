@@ -1,4 +1,4 @@
-use super::event::{EventMetadata, ConnectionInfo};
+use super::event::{ConnectionInfo, EventMetadata};
 
 #[derive(Default)]
 pub struct Tester {}

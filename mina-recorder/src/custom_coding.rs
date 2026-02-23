@@ -1,12 +1,12 @@
 use std::{
-    net::{SocketAddr, IpAddr, Ipv6Addr, Ipv4Addr},
-    time::{SystemTime, Duration},
     io,
+    net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr},
+    time::{Duration, SystemTime},
 };
 
-use mina_p2p_messages::binprot::{BinProtRead, BinProtWrite};
-use radiation::{Absorb, Emit, nom, ParseError, RadiationBuffer};
 use libp2p_core::PeerId;
+use mina_p2p_messages::binprot::{BinProtRead, BinProtWrite};
+use radiation::{nom, Absorb, Emit, ParseError, RadiationBuffer};
 
 pub fn addr_absorb(input: &[u8]) -> nom::IResult<&[u8], SocketAddr, ParseError<&[u8]>> {
     let pair = nom::sequence::pair(<[u8; 16]>::absorb::<()>, u16::absorb::<()>);

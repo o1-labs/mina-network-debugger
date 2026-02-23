@@ -13,7 +13,7 @@ mod map;
 pub use self::map::{ArrayPerCpu, ArrayPerCpuRef, HashMap, HashMapRef};
 
 mod ring_buffer;
-pub use self::ring_buffer::{RingBuffer, RingBufferRef, RingBufferData};
+pub use self::ring_buffer::{RingBuffer, RingBufferData, RingBufferRef};
 
 mod program;
 pub use self::program::ProgRef;

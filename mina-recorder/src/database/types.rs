@@ -1,20 +1,17 @@
 use std::{
-    time::{SystemTime, Duration, UNIX_EPOCH},
     fmt,
-    str::FromStr,
     net::SocketAddr,
     ops::AddAssign,
+    str::FromStr,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use mina_p2p_messages::{binprot::BinProtRead, v2, gossip::GossipNetMessageV2};
+use mina_p2p_messages::{binprot::BinProtRead, gossip::GossipNetMessageV2, v2};
 use radiation::{Absorb, Emit};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::{
-    event::ConnectionInfo, custom_coding, libp2p_helper::CapnpEvent,
-    meshsub_stats::Hash,
-};
+use crate::{custom_coding, event::ConnectionInfo, libp2p_helper::CapnpEvent, meshsub_stats::Hash};
 
 #[cfg(target_arch = "x86_64")]
 use crate::strace::StraceLine;
@@ -350,7 +347,7 @@ impl Timestamp for serde_json::Value {
 }
 
 mod implementations {
-    use radiation::{Absorb, Emit, nom, ParseError, Limit};
+    use radiation::{nom, Absorb, Emit, Limit, ParseError};
 
     use super::{StreamId, StreamKind};
 
@@ -413,6 +410,7 @@ mod implementations {
 }
 
 #[derive(Absorb)]
+#[allow(dead_code)]
 pub struct Time(#[custom_absorb(custom_coding::time_absorb)] SystemTime);
 
 impl fmt::Display for Time {
@@ -564,7 +562,7 @@ impl CapnpTableRow {
                                     .consensus_state
                                     .blockchain_length
                                     .0
-                                     .0 as u32;
+                                     .0;
                                 let msg = GossipNetMessageV2Short::NewState { height };
                                 let hash = Hash(hash);
                                 Some(CapnpEventDecoded::PublishGossip { msg, hash })
@@ -610,7 +608,7 @@ impl CapnpTableRow {
                                     .consensus_state
                                     .blockchain_length
                                     .0
-                                     .0 as u32;
+                                     .0;
                                 let msg = GossipNetMessageV2Short::NewState { height };
                                 Some(CapnpEventDecoded::ReceivedGossip {
                                     peer_id,

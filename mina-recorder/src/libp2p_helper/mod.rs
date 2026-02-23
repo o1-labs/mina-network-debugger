@@ -1,9 +1,9 @@
-use std::{io, net::SocketAddr, time::SystemTime, collections::BTreeMap};
+use std::{collections::BTreeMap, io, net::SocketAddr, time::SystemTime};
 
 use mina_p2p_messages::{binprot::BinProtRead, gossip::GossipNetMessageV2};
 use radiation::{Absorb, Emit};
 
-use crate::database::{DbCore, CapnpEventWithMetadataKey, CapnpEventWithMetadata};
+use crate::database::{CapnpEventWithMetadata, CapnpEventWithMetadataKey, DbCore};
 
 #[derive(Default)]
 pub struct CapnpReader {
@@ -30,6 +30,7 @@ impl CapnpReader {
         self.buffer.extend_from_slice(other);
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn process(
         &mut self,
         pid: u32,
@@ -91,7 +92,7 @@ impl CapnpReader {
                                     .consensus_state
                                     .blockchain_length
                                     .0
-                                     .0 as u32;
+                                     .0;
                                 Some(height)
                             }
                             Ok(_) => None,
@@ -134,10 +135,10 @@ impl CapnpReader {
 }
 
 fn calc_hash(data: &[u8], topic: &str) -> [u8; 32] {
-    use blake2::digest::{Mac, Update, FixedOutput, typenum};
+    use blake2::digest::{typenum, FixedOutput, Mac, Update};
 
     let key;
-    let key = if topic.as_bytes().len() <= 64 {
+    let key = if topic.len() <= 64 {
         topic.as_bytes()
     } else {
         key = blake2::Blake2b::<typenum::U32>::default()
@@ -164,8 +165,8 @@ pub fn process_request<R>(
 where
     R: io::Read,
 {
+    use crate::libp2p_ipc_capnp::libp2p_helper_interface::{message, push_message, rpc_request};
     use capnp::serialize;
-    use crate::libp2p_ipc_capnp::libp2p_helper_interface::{message, rpc_request, push_message};
 
     let reader = serialize::read_message(reader, Default::default())?;
 
@@ -220,12 +221,11 @@ where
             }
             _ => (),
         },
-        message::PushMessage(Ok(msg)) => match msg.which() {
-            Ok(push_message::AddResource(Ok(resource))) => {
+        message::PushMessage(Ok(msg)) => {
+            if let Ok(push_message::AddResource(Ok(resource))) = msg.which() {
                 let _ = resource;
             }
-            _ => (),
-        },
+        }
         _ => (),
     }
 
@@ -242,11 +242,11 @@ pub fn process_response<R>(
 where
     R: io::Read,
 {
-    use capnp::serialize;
     use crate::libp2p_ipc_capnp::{
         daemon_interface::{message, push_message},
         libp2p_helper_interface::{rpc_response, rpc_response_success},
     };
+    use capnp::serialize;
 
     let reader = serialize::read_message(reader, Default::default())?;
 
@@ -298,18 +298,16 @@ where
             }
             _ => (),
         },
-        message::RpcResponse(Ok(response)) => match response.which() {
-            Ok(rpc_response::Success(Ok(response))) => match response.which() {
-                Ok(rpc_response_success::Listen(Ok(addresses))) => {
+        message::RpcResponse(Ok(response)) => {
+            if let Ok(rpc_response::Success(Ok(response))) = response.which() {
+                if let Ok(rpc_response_success::Listen(Ok(addresses))) = response.which() {
                     for addr in addresses.get_result()? {
                         let addr = addr.get_representation()?;
                         log::debug!("capnp message {pid} {incoming} listen {addr}");
                     }
                 }
-                _ => (),
-            },
-            _ => (),
-        },
+            }
+        }
         _ => (),
     }
 

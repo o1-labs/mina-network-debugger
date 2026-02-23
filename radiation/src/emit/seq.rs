@@ -1,11 +1,11 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use alloc::{string::String, boxed::Box, vec::Vec};
+use alloc::{boxed::Box, string::String, vec::Vec};
 
 use super::{
-    core::{RadiationBuffer, Emit},
-    DynSized, Collection,
+    core::{Emit, RadiationBuffer},
+    Collection, DynSized,
 };
 
 impl<W> Emit<W> for usize

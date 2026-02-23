@@ -2,7 +2,7 @@ use prost::{bytes::Bytes, Message};
 use radiation::{Absorb, AbsorbExt, ParseError};
 use serde::Serialize;
 
-use libp2p_identity::{PeerId, ed25519, secp256k1, ecdsa};
+use libp2p_identity::{ecdsa, ed25519, secp256k1, PeerId};
 
 use super::{DecodeError, MessageType};
 

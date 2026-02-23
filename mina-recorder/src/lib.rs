@@ -1,10 +1,10 @@
 /// Contains header for kernel events.
 mod event;
-pub use self::event::{EventMetadata, ConnectionInfo, DirectedId};
+pub use self::event::{ConnectionInfo, DirectedId, EventMetadata};
 
 /// Represents chunk of raw data flown in TCP connection.
 mod chunk;
-pub use self::chunk::{ChunkHeader, EncryptionStatus, ChunkParser};
+pub use self::chunk::{ChunkHeader, ChunkParser, EncryptionStatus};
 
 /// State machine that manages debuggee processes and their TCP connections.
 mod recorder;

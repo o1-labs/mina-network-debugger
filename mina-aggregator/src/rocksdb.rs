@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use radiation::{Collection, Emit, AbsorbExt, nom, ParseError};
+use radiation::{nom, AbsorbExt, Collection, Emit, ParseError};
 use thiserror::Error;
 
 use super::database::GlobalBlockState;

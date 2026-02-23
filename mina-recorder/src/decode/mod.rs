@@ -1,18 +1,18 @@
-pub mod noise;
-pub mod meshsub;
-pub mod kademlia;
-pub mod rpc;
 pub mod identify;
 pub mod json_string;
-pub mod yamux;
+pub mod kademlia;
+pub mod meshsub;
 pub mod meshsub_stats;
+pub mod noise;
+pub mod rpc;
+pub mod yamux;
 
 mod utils;
 
 use std::{fmt, str::FromStr, string::FromUtf8Error};
 
-use serde::{Serialize, Deserialize};
-use radiation::{Absorb, Emit, nom, ParseError};
+use radiation::{nom, Absorb, Emit, ParseError};
+use serde::{Deserialize, Serialize};
 
 use thiserror::Error;
 

@@ -1,9 +1,9 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use nom::{IResult, Err};
+use nom::{Err, IResult};
 
-use super::{limit::Limit, error::ParseError};
+use super::{error::ParseError, limit::Limit};
 
 pub trait Absorb<'pa>
 where

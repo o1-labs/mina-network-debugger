@@ -1,9 +1,9 @@
 // Copyright 2022 Vladislav Melnik
 // SPDX-License-Identifier: MIT
 
-use core::sync::atomic::{AtomicUsize, AtomicU64, AtomicI64};
+use core::sync::atomic::{AtomicI64, AtomicU64, AtomicUsize};
 
-use nom::{IResult, combinator};
+use nom::{combinator, IResult};
 
 use super::{core::Absorb, error::ParseError, limit::Limit};
 
@@ -12,7 +12,7 @@ impl<'pa> Absorb<'pa> for AtomicUsize {
     where
         L: Limit,
     {
-        combinator::map(Absorb::absorb::<L>, |v| Self::new(v))(input)
+        combinator::map(Absorb::absorb::<L>, Self::new)(input)
     }
 }
 
@@ -21,7 +21,7 @@ impl<'pa> Absorb<'pa> for AtomicU64 {
     where
         L: Limit,
     {
-        combinator::map(Absorb::absorb::<L>, |v| Self::new(v))(input)
+        combinator::map(Absorb::absorb::<L>, Self::new)(input)
     }
 }
 
@@ -30,6 +30,6 @@ impl<'pa> Absorb<'pa> for AtomicI64 {
     where
         L: Limit,
     {
-        combinator::map(Absorb::absorb::<L>, |v| Self::new(v))(input)
+        combinator::map(Absorb::absorb::<L>, Self::new)(input)
     }
 }

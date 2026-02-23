@@ -42,7 +42,10 @@ fn build_bpf() {
     //     let error = String::from_utf8(output.stderr).expect("malformed error message");
     //     panic!("{}", error);
     // }
-    let bpf_path = format!("{}/bpfel-unknown-none/release/bpf-recorder-kern", target_dir);
+    let bpf_path = format!(
+        "{}/bpfel-unknown-none/release/bpf-recorder-kern",
+        target_dir
+    );
 
     // Only patch if the BPF object exists
     if std::path::Path::new(&bpf_path).exists() {
@@ -55,16 +58,12 @@ fn build_bpf() {
             .expect("failed to patch bpf object");
     } else {
         // Create dummy BPF object for builds without BPF support
-        std::fs::create_dir_all(format!("{}/bpfel-unknown-none/release", target_dir))
-            .unwrap_or_else(|_| ());
-        std::fs::write(&bpf_path, b"").unwrap_or_else(|_| ());
+        let _ = std::fs::create_dir_all(format!("{}/bpfel-unknown-none/release", target_dir));
+        let _ = std::fs::write(&bpf_path, b"");
         eprintln!("Warning: Building without BPF support (BPF object not found)");
     }
 
-    println!(
-        "cargo:rustc-env=BPF_CODE_RECORDER={}",
-        bpf_path
-    );
+    println!("cargo:rustc-env=BPF_CODE_RECORDER={}", bpf_path);
     println!("cargo:rerun-if-changed=src/main.rs");
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/context.rs");

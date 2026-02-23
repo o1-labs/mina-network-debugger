@@ -1,6 +1,6 @@
 use core::{
+    ffi::{c_int, c_void},
     ptr,
-    ffi::{c_void, c_int},
 };
 
 use super::helpers;
@@ -11,6 +11,7 @@ pub struct RingBuffer<const MAX_ENTRIES: usize> {
     max_entries: *mut [u32; MAX_ENTRIES],
 }
 
+#[allow(clippy::new_without_default)]
 impl<const MAX_ENTRIES: usize> RingBuffer<MAX_ENTRIES> {
     pub const fn new() -> Self {
         RingBuffer {

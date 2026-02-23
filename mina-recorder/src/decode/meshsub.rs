@@ -3,17 +3,17 @@ use std::io::Cursor;
 use libp2p_core::PeerId;
 use mina_p2p_messages::{
     binprot::BinProtRead,
-    GossipNetMessageV1,
     gossip::GossipNetMessageV2,
     v2::{
-        NetworkPoolSnarkPoolDiffVersionedStableV2, TransactionSnarkWorkStatementStableV2, self,
-        TransactionSnarkWorkTStableV2Proofs, MinaBlockBlockStableV2,
+        self, MinaBlockBlockStableV2, NetworkPoolSnarkPoolDiffVersionedStableV2,
+        TransactionSnarkWorkStatementStableV2, TransactionSnarkWorkTStableV2Proofs,
     },
+    GossipNetMessageV1,
 };
-use serde::Serialize;
 use prost::{bytes::Bytes, Message};
+use serde::Serialize;
 
-use super::{DecodeError, MessageType, meshsub_stats::Hash, LedgerHash};
+use super::{meshsub_stats::Hash, DecodeError, LedgerHash, MessageType};
 
 #[allow(clippy::derive_partial_eq_without_eq)]
 mod pb {
@@ -224,72 +224,51 @@ pub fn parse_types(
             0 => {
                 let mut c = Cursor::new(&data[8..]);
                 if index_ledger_hash {
-                    match GossipNetMessageV2::binprot_read(&mut c) {
-                        Ok(GossipNetMessageV2::NewState(block)) => {
-                            let it0 = block.body.staged_ledger_diff.diff.0.completed_works.iter();
-                            let it1 = block
-                                .body
-                                .staged_ledger_diff
-                                .diff
-                                .1
-                                .as_ref()
-                                .into_iter()
-                                .flat_map(|x| x.completed_works.iter());
-                            for di in it0.chain(it1) {
-                                match &di.proofs {
-                                    TransactionSnarkWorkTStableV2Proofs::One(w) => {
-                                        let source =
-                                            w.0.statement
-                                                .source
-                                                .first_pass_ledger
-                                                .clone()
-                                                .into_inner();
-                                        let mut h = [0; 31];
-                                        h.clone_from_slice(&source.0.as_ref()[1..]);
-                                        ledger_hashes.push(LedgerHash::Source(h));
-                                        let target =
-                                            w.0.statement
-                                                .target
-                                                .first_pass_ledger
-                                                .clone()
-                                                .into_inner();
-                                        let mut h = [0; 31];
-                                        h.clone_from_slice(&target.0.as_ref()[1..]);
-                                        ledger_hashes.push(LedgerHash::Target(h));
-                                    }
-                                    TransactionSnarkWorkTStableV2Proofs::Two((f, s)) => {
-                                        let l =
-                                            f.0.statement
-                                                .source
-                                                .first_pass_ledger
-                                                .clone()
-                                                .into_inner();
-                                        let mut h = [0; 31];
-                                        h.clone_from_slice(&l.0.as_ref()[1..]);
-                                        ledger_hashes.push(LedgerHash::FirstSource(h));
-                                        let l =
-                                            f.0.statement
-                                                .target
-                                                .first_pass_ledger
-                                                .clone()
-                                                .into_inner();
-                                        let mut h = [0; 31];
-                                        h.clone_from_slice(&l.0.as_ref()[1..]);
-                                        ledger_hashes.push(LedgerHash::Middle(h));
-                                        let l =
-                                            s.0.statement
-                                                .target
-                                                .first_pass_ledger
-                                                .clone()
-                                                .into_inner();
-                                        let mut h = [0; 31];
-                                        h.clone_from_slice(&l.0.as_ref()[1..]);
-                                        ledger_hashes.push(LedgerHash::SecondTarget(h));
-                                    }
+                    if let Ok(GossipNetMessageV2::NewState(block)) =
+                        GossipNetMessageV2::binprot_read(&mut c)
+                    {
+                        let it0 = block.body.staged_ledger_diff.diff.0.completed_works.iter();
+                        let it1 = block
+                            .body
+                            .staged_ledger_diff
+                            .diff
+                            .1
+                            .as_ref()
+                            .into_iter()
+                            .flat_map(|x| x.completed_works.iter());
+                        for di in it0.chain(it1) {
+                            match &di.proofs {
+                                TransactionSnarkWorkTStableV2Proofs::One(w) => {
+                                    let source =
+                                        w.0.statement.source.first_pass_ledger.clone().into_inner();
+                                    let mut h = [0; 31];
+                                    h.clone_from_slice(&source.0.as_ref()[1..]);
+                                    ledger_hashes.push(LedgerHash::Source(h));
+                                    let target =
+                                        w.0.statement.target.first_pass_ledger.clone().into_inner();
+                                    let mut h = [0; 31];
+                                    h.clone_from_slice(&target.0.as_ref()[1..]);
+                                    ledger_hashes.push(LedgerHash::Target(h));
+                                }
+                                TransactionSnarkWorkTStableV2Proofs::Two((f, s)) => {
+                                    let l =
+                                        f.0.statement.source.first_pass_ledger.clone().into_inner();
+                                    let mut h = [0; 31];
+                                    h.clone_from_slice(&l.0.as_ref()[1..]);
+                                    ledger_hashes.push(LedgerHash::FirstSource(h));
+                                    let l =
+                                        f.0.statement.target.first_pass_ledger.clone().into_inner();
+                                    let mut h = [0; 31];
+                                    h.clone_from_slice(&l.0.as_ref()[1..]);
+                                    ledger_hashes.push(LedgerHash::Middle(h));
+                                    let l =
+                                        s.0.statement.target.first_pass_ledger.clone().into_inner();
+                                    let mut h = [0; 31];
+                                    h.clone_from_slice(&l.0.as_ref()[1..]);
+                                    ledger_hashes.push(LedgerHash::SecondTarget(h));
                                 }
                             }
                         }
-                        _ => (),
                     }
                 }
                 Some(MessageType::PublishNewState)
@@ -297,11 +276,12 @@ pub fn parse_types(
             1 => {
                 let mut c = Cursor::new(&data[8..]);
                 if index_ledger_hash {
-                    match GossipNetMessageV2::binprot_read(&mut c) {
-                        Ok(GossipNetMessageV2::SnarkPoolDiff {
-                            message: NetworkPoolSnarkPoolDiffVersionedStableV2::AddSolvedWork(w),
-                            ..
-                        }) => match &w.0 {
+                    if let Ok(GossipNetMessageV2::SnarkPoolDiff {
+                        message: NetworkPoolSnarkPoolDiffVersionedStableV2::AddSolvedWork(w),
+                        ..
+                    }) = GossipNetMessageV2::binprot_read(&mut c)
+                    {
+                        match &w.0 {
                             TransactionSnarkWorkStatementStableV2::One(w) => {
                                 let source = w.0.source.first_pass_ledger.clone().into_inner();
                                 let mut h = [0; 31];
@@ -326,8 +306,7 @@ pub fn parse_types(
                                 h.clone_from_slice(&l.0.as_ref()[1..]);
                                 ledger_hashes.push(LedgerHash::SecondTarget(h));
                             }
-                        },
-                        _ => (),
+                        }
                     }
                 }
                 Some(MessageType::PublishSnarkPoolDiff)
@@ -418,10 +397,10 @@ pub fn parse_it(
                         return Some(Event::PublishPreview { topic, message });
                     } else {
                         let hash = if calc_hash {
-                            use blake2::digest::{Mac, Update, FixedOutput, typenum};
+                            use blake2::digest::{typenum, FixedOutput, Mac, Update};
 
                             let key;
-                            let key = if topic.as_bytes().len() <= 64 {
+                            let key = if topic.len() <= 64 {
                                 topic.as_bytes()
                             } else {
                                 key = blake2::Blake2b::<typenum::U32>::default()
@@ -459,10 +438,10 @@ pub fn parse_it(
                 let from = PeerId::from_bytes(&from?).ok()?;
 
                 let hash = if calc_hash {
-                    use blake2::digest::{Mac, Update, FixedOutput, typenum};
+                    use blake2::digest::{typenum, FixedOutput, Mac, Update};
 
                     let key;
-                    let key = if topic.as_bytes().len() <= 64 {
+                    let key = if topic.len() <= 64 {
                         topic.as_bytes()
                     } else {
                         key = blake2::Blake2b::<typenum::U32>::default()
@@ -594,8 +573,8 @@ fn tag0_msg() {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
     use mina_p2p_messages::{binprot::BinProtRead, gossip::GossipNetMessageV2};
+    use std::io::Cursor;
 
     #[test]
     fn parse_new_berkeley_2() {

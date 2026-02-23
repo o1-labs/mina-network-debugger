@@ -1,6 +1,6 @@
 use core::{
+    ffi::{c_long, c_void},
     mem,
-    ffi::{c_void, c_long},
 };
 
 #[allow(non_camel_case_types)]

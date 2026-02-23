@@ -1,34 +1,37 @@
 [workspace]
 members = [
-    "bpf-recorder",
-    "bpf-ring-buffer",
-    "ebpf-kern",
-    "ebpf-kern/macros",
-    "ebpf-user",
-    "ebpf-user/macros",
-    "mina-recorder",
-    "mina-aggregator",
-    "radiation",
-    "radiation/macros",
-    "tester",
-    "mina-ipc",
-    "simulator",
-    "topology-tool",
+    # Authored crates
+    "crates/bpf-recorder",
+    "crates/bpf-ring-buffer",
+    "crates/mina-recorder",
+    "crates/mina-aggregator",
+    "crates/mina-ipc",
+    "crates/simulator",
+    "crates/tester",
+    "crates/topology-tool",
+    # Vendored crates
+    "vendored/ebpf-kern",
+    "vendored/ebpf-kern/macros",
+    "vendored/ebpf-user",
+    "vendored/ebpf-user/macros",
+    "vendored/radiation",
+    "vendored/radiation/macros",
 ]
 resolver = "2"
 
 [workspace.dependencies]
-# Workspace internal crates
-ebpf-kern = { path = "ebpf-kern" }
-ebpf-kern-macros = { version = "0.2.0", path = "ebpf-kern/macros" }
-ebpf-user = { path = "ebpf-user" }
-ebpf-user-macros = { version = "0.2.0", path = "ebpf-user/macros" }
-bpf-ring-buffer = { version = "=0.1.0", path = "bpf-ring-buffer" }
-mina-recorder = { path = "mina-recorder" }
-radiation = { path = "radiation" }
-radiation-macros = { version = "=0.3.1", path = "radiation/macros" }
-mina-ipc = { path = "mina-ipc" }
-simulator = { path = "simulator" }
+# Authored crates
+bpf-ring-buffer = { version = "=0.1.0", path = "crates/bpf-ring-buffer" }
+mina-recorder = { path = "crates/mina-recorder" }
+mina-ipc = { path = "crates/mina-ipc" }
+simulator = { path = "crates/simulator" }
+# Vendored crates
+ebpf-kern = { path = "vendored/ebpf-kern" }
+ebpf-kern-macros = { version = "0.2.0", path = "vendored/ebpf-kern/macros" }
+ebpf-user = { path = "vendored/ebpf-user" }
+ebpf-user-macros = { version = "0.2.0", path = "vendored/ebpf-user/macros" }
+radiation = { path = "vendored/radiation" }
+radiation-macros = { version = "=0.3.1", path = "vendored/radiation/macros" }
 
 # Proc-macro utilities
 proc-macro2 = "1.0"

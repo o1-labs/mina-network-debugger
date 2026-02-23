@@ -31,9 +31,9 @@ RUN cargo install bpf-linker --git ${linker_src}
 # RUN cargo install --git https://github.com/openmina/mina-network-debugger bpf-recorder --bin bpf-recorder
 COPY . .
 RUN CARGO_TARGET_DIR=target/bpf cargo rustc --package=bpf-recorder --bin=bpf-recorder-kern --features=kern --no-default-features --target=bpfel-unknown-none -Z build-std=core --release -- -Cdebuginfo=2 -Clink-arg=--disable-memory-builtins -Clink-arg=--btf
-RUN cargo install --path bpf-recorder bpf-recorder
-RUN cargo install --path mina-aggregator mina-aggregator
-RUN cargo install --path topology-tool topology-tool
+RUN cargo install --path crates/bpf-recorder bpf-recorder
+RUN cargo install --path crates/mina-aggregator mina-aggregator
+RUN cargo install --path crates/topology-tool topology-tool
 
 FROM ubuntu:20.04
 

@@ -56,7 +56,7 @@ tokio-util = { version = "0.7.10", features = ["codec"] }
 
 # HTTP
 warp = { version = "0.3.7", features = ["tls"] }
-reqwest = { version = "0.12.5", features = ["blocking"] }
+reqwest = { version = "0.12.9", features = ["blocking"] }
 
 # Protobuf / CapnProto
 prost = "0.13.1"

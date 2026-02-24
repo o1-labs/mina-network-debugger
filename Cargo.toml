@@ -37,22 +37,22 @@ radiation-macros = { version = "=0.3.1", path = "vendored/radiation/macros" }
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "2.0", features = ["derive", "parsing"] }
-synstructure = "0.13.1"
+synstructure = "0.13.2"
 
 # Logging
-log = "0.4.22"
-env_logger = { version = "0.11.3", default-features = false }
+log = "0.4.29"
+env_logger = { version = "0.11.9", default-features = false }
 
 # Serialization
-serde = { version = ">=1.0, <1.0.194", features = ["derive"] }
+serde = { version = ">=1.0, <1.0.229", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 hex = "0.4.3"
 base64 = "0.22.1"
 nom = "7.1"
 
 # Async runtime
-tokio = { version = "1.38", features = ["rt-multi-thread"] }
-tokio-util = { version = "0.7.10", features = ["codec"] }
+tokio = { version = "1.42", features = ["rt-multi-thread"] }
+tokio-util = { version = "0.7.18", features = ["codec"] }
 
 # HTTP
 warp = { version = "0.3.7", features = ["tls"] }
@@ -68,25 +68,25 @@ capnpc = "0.15.2"
 salsa20 = "0.10.2"
 blake2 = "0.10.6"
 curve25519-dalek = "3.2"
-sha2 = "0.10.8"
+sha2 = "0.10.9"
 sha3 = "0.10.8"
 chacha20poly1305 = "0.10.1"
 vru-noise = "1.5"
 
 # libp2p
 libp2p-core = { version = "0.41.3", features = ["serde"] }
-libp2p-identity = { version = "0.2.9", features = ["ed25519", "secp256k1", "ecdsa"] }
-multiaddr = "0.18.1"
+libp2p-identity = { version = "0.2.13", features = ["ed25519", "secp256k1", "ecdsa"] }
+multiaddr = "0.18.2"
 unsigned-varint = "0.8.0"
 
 # eBPF / system
-libbpf-sys = "1.4.2"
+libbpf-sys = "1.6.2"
 libc = "0.2.155"
-epoll = "4.3"
+epoll = "4.4"
 cty = "0.2.2"
-errno = "0.3.1"
+errno = "0.3.14"
 network-types = "0.0.4"
-typenum = "1.17"
+typenum = "1.19"
 nix = "0.28.0"
 signal-hook = "0.3.17"
 
@@ -98,13 +98,13 @@ thiserror = "1.0"
 anyhow = "1.0"
 
 # Utilities
-ctrlc = { version = "3.4.4", features = ["termination"] }
+ctrlc = { version = "3.5.2", features = ["termination"] }
 itertools = "0.13.0"
-parking_lot = "0.12.3"
+parking_lot = "0.12.5"
 bitflags = "1.3"
-time = { version = "0.3.36", features = ["parsing", "formatting"] }
+time = { version = "0.3.47", features = ["parsing", "formatting"] }
 rand = "0.8.5"
-bytes = "1.5"
+bytes = "1.11"
 petgraph = "0.6.5"
 roxmltree = "0.20.0"
 structopt = "0.3.26"

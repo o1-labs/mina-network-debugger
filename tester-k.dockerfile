@@ -2,7 +2,7 @@
 
 ARG mina_daemon_image
 
-FROM rust:1.67-bullseye as builder
+FROM rust:1.93-bullseye as builder
 
 RUN curl -sSL https://capnproto.org/capnproto-c++-0.10.2.tar.gz | tar -zxf - \
   && cd capnproto-c++-0.10.2 \

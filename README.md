@@ -17,17 +17,13 @@
 
 ## Introduction
 
-The P2P network is the key component of the Mina blockchain. It is used for communication between nodes, which, among other things, also includes block propagation and the updating of the blockchain state. We want to have a close look at the messages sent by nodes to see if there are inefficiencies in communication so that we know where to optimize.
+The Mina Network Debugger traces P2P network traffic from the Mina blockchain to detect communication inefficiencies. It uses [eBPF](https://ebpf.io/what-is-ebpf/) to externally trace the Mina application's `libp2p_helper` subprocess without modifying the application itself.
 
-We achieve this by externally tracing the Mina application through eBPF. eBPF allows developers to run their code inside the Linux kernel. It is secure because the code is translated into bytecode, not machine code, and statically analyzed before execution. This bytecode allows limited read-only access to internal kernel structures and is triggered by a kernel event such as (but not limited to) `syscall`.
+The debugger consists of two parts:
+- **eBPF module**: Runs in the Linux kernel, intercepts syscalls from `libp2p_helper` to capture network and IPC data, and sends it to userspace via shared memory.
+- **Userspace application**: Receives the captured data, decrypts it, parses it, stores it in a database, and serves it over HTTP.
 
-The Mina Network Debugger consists of two parts: an eBPF module and a normal userspace application. The eBPF module collects the data from the kernel and the userspace application decrypts the data, parses it, stores it in a database and serves it over http.
-
-The Mina application launches the libp2p_helper subprocess to communicate with peers over the network. It does this through an `exec` syscall. The eBPF module in the kernel listens for this syscall and thus detects the libp2p_helper subprocess. After that, the eBPF module can focus on the libp2p_helper and listen to its syscalls.
-
-The libp2p_helper communicates with the Mina application through its stdin (standard input) and stdout (standard output) pipes. Every Linux process has such pipes. The Mina application writes commands to libp2p_helper's stdin and reads events from libp2p_helper's stdout. In addition, libp2p_helper communicates with peers around the world via TCP connections. The eBPF module intercepts all the data read and written by libp2p_helper and sends it to userspace via shared memory.
-
-The userspace part of the debugger receives all data from the eBPF module, decrypts it and parses it. The debugger doesn't need a secret key to decrypt the data, because for network interaction the fresh secret key is generated when the Mina application is started and then it is signed by the static (permanent) secret key. However, because the key is generated at startup, the debugger can intercept it, just like any other data. Please note that this is not the key that protects the user's tokens, which is much more difficult to intercept.
+The debugger intercepts the ephemeral encryption key generated at startup to decrypt network traffic. This is not the key that protects the user's tokens.
 
 ## Quick Start
 

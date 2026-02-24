@@ -2,44 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Quick Reference
-
-Run `make help` to see all available commands.
-
 ## Build Commands
 
-```bash
-# Setup development environment
-make setup              # Install all dependencies (Rust, bpf-linker, capnproto)
-make setup-deps         # Install system dependencies (Ubuntu/Debian)
-
-# Build
-make build              # Debug build
-make build-release      # Release build
-make build-kern         # Build BPF kernel module (requires nightly)
-make build-all          # Build both kernel module and userspace
-
-# Test
-make test               # Run unit tests
-make test-release       # Run tests in release mode
-
-# Run
-make run                # Build and run debugger (requires sudo)
-make run-test           # Run integration test
-
-# Code quality
-make format             # Format code with rustfmt
-make check-format       # Check formatting
-make lint               # Run clippy linter
-
-# Docker
-make docker-build       # Build Docker image
-make docker-run         # Run in Docker container
-
-# Clean
-make clean              # Clean build artifacts
-make clean-db           # Clean database directory
-```
+Run `make help` to see all available commands.
 
 ## Architecture
 

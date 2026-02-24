@@ -1,7 +1,7 @@
 # `docker build -f dev-dockerfile -t local/network-debugger:latest .`
 # `docker run --rm --privileged -v /sys/kernel/debug:/sys/kernel/debug local/network-debugger:latest`
 
-FROM ubuntu:20.04 as builder
+FROM ubuntu:24.04 as builder
 
 ARG linker_src="https://github.com/aya-rs/bpf-linker"
 
@@ -35,7 +35,7 @@ RUN cargo install --path crates/bpf-recorder bpf-recorder
 RUN cargo install --path crates/mina-aggregator mina-aggregator
 RUN cargo install --path crates/topology-tool topology-tool
 
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y zlib1g libelf1 libgcc1 libssl-dev
 COPY --from=builder /root/.cargo/bin/bpf-recorder /usr/bin/bpf-recorder
